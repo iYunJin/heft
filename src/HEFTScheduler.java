@@ -41,16 +41,16 @@ public class HEFTScheduler {
             return task.rank;
         }
 
-        if (dag.getDependencies(task).isEmpty()) {
+        if (task.pred.isEmpty()) {
             return task.computationCost;
         }
         double maxRank = 0;
-        for (Task predecessor : dag.getDependencies(task)) {
-            double rank = upwardRank(predecessor) + predecessor.computationCost;
+        for (Task predecessor : task.pred) {
+            double rank = upwardRank(predecessor) + task.communicationCosts.get(predecessor);
             maxRank = Math.max(maxRank, rank);
         }
 
-        return maxRank;
+        return maxRank + task.computationCost;
     }
 
 //    private int getPriority(Task task) {

@@ -24,6 +24,8 @@ public class DAG {
     public void addDependency(Task fromVertex, Task toVertex, int cost){
         addTask(fromVertex);
         addTask(toVertex);
+        fromVertex.addPred(toVertex);
+        toVertex.addSuc(fromVertex);
         fromVertex.addCommunicationCost(toVertex,cost);
         graph.get(fromVertex).add(toVertex);
     }
