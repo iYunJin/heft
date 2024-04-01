@@ -11,12 +11,11 @@ public class HEFTScheduler {
 
     public void schedule() {
 
-        upwardRank();
+//        upwardRank();
 
         List<Task> tasks = dag.getTasks();
 
         Comparator<Task> rankComparator = Comparator.comparingDouble(task->-task.rank);
-
         tasks.sort(rankComparator);
 
 
@@ -27,38 +26,30 @@ public class HEFTScheduler {
         }
     }
 
-    public void upwardRank() {
-        List<Task> tasks = dag.topologicalSort();
-        Collections.reverse(tasks);
-
-        for (Task task : tasks) {
-            task.rank = upwardRank(task);
-        }
-    }
-
-    private double upwardRank(Task task) {
-        if (task.rank > 0) {
-            return task.rank;
-        }
-
-        if (task.suc.isEmpty()) {
-            return task.computationCost;
-        }
-        double maxRank = 0;
-        for (Task suc : task.suc) {
-            double rank = upwardRank(suc) + task.communicationCosts.get(suc); //到时候加除以处理器的speed
-            maxRank = Math.max(maxRank, rank);
-        }
-
-        return maxRank + task.computationCost;
-    }
-
-//    private int getPriority(Task task) {
-//        int priority = task.computationCost;
-//        for (Task predecessor : dag.getDependencies(task)) {
-//            priority += task.communicationCosts.get(predecessor);
+//    public void upwardRank() {
+//        List<Task> tasks = dag.topologicalSort();
+//        Collections.reverse(tasks);
+//
+//        for (Task task : tasks) {
+//            task.rank = upwardRank(task);
 //        }
-//        return priority;
+//    }
+//
+//    private double upwardRank(Task task) {
+//        if (task.rank > 0) {
+//            return task.rank;
+//        }
+//
+//        if (task.suc.isEmpty()) {
+//            return task.computationCost;
+//        }
+//        double maxRank = 0;
+//        for (Task suc : task.suc) {
+//            double rank = upwardRank(suc) + task.communicationCosts.get(suc); //到时候加除以处理器的speed
+//            maxRank = Math.max(maxRank, rank);
+//        }
+//
+//        return maxRank + task.computationCost;
 //    }
 
 }

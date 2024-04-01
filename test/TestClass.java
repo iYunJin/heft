@@ -23,15 +23,18 @@ public class TestClass {
         dag.addDependency(t5,t6,13);
 
         List<Task> sortedVertices = dag.topologicalSort();
-        System.out.println("Topological Order:");
-        for (Task vertex : sortedVertices) {
-            System.out.print(vertex.name + " ");
-        }
+
+//        System.out.println("Topological Order:");
+//        for (Task vertex : sortedVertices) {
+//            System.out.print(vertex.name + " ");
+//        }
         System.out.println();
 
-        HEFTScheduler scheduler = new HEFTScheduler(dag);
+//        HEFTScheduler scheduler = new HEFTScheduler(dag);
+//
+//        scheduler.schedule();
 
-        scheduler.schedule();
-
+        dag.calculateRank();
+        dag.printGraph();
     }
 }
