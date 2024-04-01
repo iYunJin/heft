@@ -3,10 +3,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Task类改为接口
+ */
+
+
 public class Task {
     String name;
     int computationCost;
+    int deadline;
+    int dependencyPriority;
     double rank;
+    int priority;
     List<Task> suc;
     List<Task> pred;
 
@@ -30,5 +38,28 @@ public class Task {
 
     public void addPred(Task pred){
         this.pred.add(pred);
+    }
+
+    public String getName() {
+        return name;
+    }
+    public int getComputationCost() {
+        return computationCost;
+    }
+
+    public int getDeadline() {
+        return deadline;
+    }
+
+    public int getDependencyPriority() {
+        return dependencyPriority;
+    }
+
+    public double getRank() {
+        return rank;
+    }
+
+    public int getPriority() {
+        return priority;
     }
 }

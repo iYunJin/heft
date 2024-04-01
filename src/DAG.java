@@ -1,9 +1,13 @@
 import java.util.*;
 
 public class DAG {
+    String name;
     private final Map<Task, List<Task>> graph;
-
-    public DAG(){
+    /**
+     * 构造函数
+     */
+    public DAG(String name){
+        this.name = name;
         graph = new HashMap<>();
     }
 
@@ -15,7 +19,6 @@ public class DAG {
             graph.put(vertex, new ArrayList<>());
         }
     }
-
     /**
      * 节点之间添加有向边
      * @param fromVertex 出节点
@@ -24,8 +27,8 @@ public class DAG {
     public void addDependency(Task fromVertex, Task toVertex, int cost){
         addTask(fromVertex);
         addTask(toVertex);
-        fromVertex.addPred(toVertex);
-        toVertex.addSuc(fromVertex);
+        fromVertex.addSuc(toVertex);
+        toVertex.addPred(fromVertex);
         fromVertex.addCommunicationCost(toVertex,cost);
         graph.get(fromVertex).add(toVertex);
     }

@@ -41,12 +41,12 @@ public class HEFTScheduler {
             return task.rank;
         }
 
-        if (task.pred.isEmpty()) {
+        if (task.suc.isEmpty()) {
             return task.computationCost;
         }
         double maxRank = 0;
-        for (Task predecessor : task.pred) {
-            double rank = upwardRank(predecessor) + task.communicationCosts.get(predecessor);
+        for (Task suc : task.suc) {
+            double rank = upwardRank(suc) + task.communicationCosts.get(suc); //到时候加除以处理器的speed
             maxRank = Math.max(maxRank, rank);
         }
 

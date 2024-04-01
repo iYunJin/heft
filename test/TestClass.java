@@ -5,7 +5,7 @@ import java.util.List;
 public class TestClass {
     @Test
     public void test1(){
-        DAG dag = new DAG();
+        DAG dag = new DAG("dag1");
         Task t1 = new Task("a",8);
         Task t2 = new Task("b",14);
         Task t3 = new Task("c",9);
