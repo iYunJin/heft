@@ -5,14 +5,13 @@ public class DAG {
     Task entry;
     private final Map<Task, List<Task>> graph;
 
-    public List<Task> sortedTasks = null;
+    public List<Task> sortedTasks;
     /**
      * 构造函数
      */
     public DAG(String name) {
         this.name = name;
         graph = new HashMap<>();
-        sortedTasks = new ArrayList<>();
     }
 
     /**
@@ -71,6 +70,7 @@ public class DAG {
         }
 
         //拓扑排序
+        sortedTasks = new ArrayList<>();
         while (!queue.isEmpty()) {
             Task task = queue.poll();
             sortedTasks.add(task);
@@ -96,7 +96,9 @@ public class DAG {
      * 依赖优先级 = 前驱节点的依赖优先级最大值
      */
     public void calculateDependencyPriority() {
-        List<Task> sortedTasks = topologicalSort();
+        if (sortedTasks == null)
+            topologicalSort();
+
         for (Task task : sortedTasks) {
             int maxPriority = 0;
             for (Task pred : task.pred) {
@@ -107,7 +109,9 @@ public class DAG {
     }
 
     public void calculateRank() {
-        List<Task> sortedTasks = topologicalSort();
+        if (sortedTasks == null)
+            topologicalSort();
+
         Collections.reverse(sortedTasks);
         //递归调用计算
         for (Task task : sortedTasks) {

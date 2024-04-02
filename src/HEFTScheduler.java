@@ -22,7 +22,7 @@ public class HEFTScheduler {
         System.out.println("Schedule:");
         for (Task task : tasks) {
             //System.out.println("Task: " + task.name + ", Earliest Finish Time: " + earliestFinishTimes.get(task));
-            System.out.println("Task: " + task.name + ", Rank: " + task.rank);
+            System.out.println("Task: " + task.getName() + ", Rank: " + task.rank);
         }
     }
 

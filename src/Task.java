@@ -4,17 +4,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Task类改为接口
+ * 任务类
  */
-
-
 public class Task {
-    String name;
+    private String name;
     int computationCost;
     int deadline;
     int dependencyPriority;
     double rank;
-    int priority;
+    double priority;
     List<Task> suc;
     List<Task> pred;
 
@@ -72,7 +70,7 @@ public class Task {
         return rank;
     }
 
-    public int getPriority() {
+    public double getPriority() {
         return priority;
     }
 

@@ -1,3 +1,6 @@
+/**
+ * Processor class to store the name, speed, and cost of a processor.
+ */
 public class Processor {
     private String name;
     private int speed;

@@ -22,8 +22,6 @@ public class TestClass {
         dag.addDependency(t4,t6,7);
         dag.addDependency(t5,t6,13);
 
-        List<Task> sortedVertices = dag.topologicalSort();
-
 //        System.out.println("Topological Order:");
 //        for (Task vertex : sortedVertices) {
 //            System.out.print(vertex.name + " ");
@@ -35,6 +33,6 @@ public class TestClass {
 //        scheduler.schedule();
 
         dag.calculateRank();
-        dag.printGraph();
+//        dag.printGraph();
     }
 }
