@@ -5,12 +5,14 @@ public class DAG {
     Task entry;
     private final Map<Task, List<Task>> graph;
 
+    public List<Task> sortedTasks = null;
     /**
      * 构造函数
      */
     public DAG(String name) {
         this.name = name;
         graph = new HashMap<>();
+        sortedTasks = new ArrayList<>();
     }
 
     /**
@@ -69,7 +71,6 @@ public class DAG {
         }
 
         //拓扑排序
-        List<Task> sortedTasks = new ArrayList<>();
         while (!queue.isEmpty()) {
             Task task = queue.poll();
             sortedTasks.add(task);
@@ -128,10 +129,8 @@ public class DAG {
     /**
      * 遍历图,打印rank值
      */
-    public void printGraph() {
-        for (Task task : graph.keySet()){
-            System.out.println(task.name+" rank = "+task.rank);
-        }
+    public void printGraph(){
+        //TODO
     }
 
     public void setEntry(Task entry) {
