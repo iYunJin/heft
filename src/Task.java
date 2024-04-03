@@ -11,11 +11,19 @@ public class Task {
     int computationCost;
     int deadline;
     int dependencyPriority;
+    // 最早开始时间
+    int earliestStartTime;
+
+    // makeSpan 任务完成时间
+    int makeSpan;
     double rank;
     double priority;
-    List<Task> suc;
-    List<Task> pred;
 
+    // 后继节点
+    List<Task> suc;
+    // 前驱节点
+    List<Task> pred;
+    // 通信代价
     Map<Task,Integer> communicationCosts;
 
     public Task(String name, int computationCost) {

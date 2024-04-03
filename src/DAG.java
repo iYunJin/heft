@@ -3,15 +3,18 @@ import java.util.*;
 public class DAG {
     String name;
     Task entry;
+    //存储图的邻接表
     private final Map<Task, List<Task>> graph;
-
     public List<Task> sortedTasks;
+
+    Queue<Task> taskPriorityQueue;
     /**
      * 构造函数
      */
     public DAG(String name) {
         this.name = name;
         graph = new HashMap<>();
+        taskPriorityQueue = new LinkedList<>();
     }
 
     /**
@@ -89,45 +92,6 @@ public class DAG {
         }
 
         return sortedTasks;
-    }
-
-    /**
-     * 计算依赖优先级,并将其存储在Task类的dependencyPriority中
-     * 依赖优先级 = 前驱节点的依赖优先级最大值
-     */
-    public void calculateDependencyPriority() {
-        if (sortedTasks == null)
-            topologicalSort();
-
-        for (Task task : sortedTasks) {
-            int maxPriority = 0;
-            for (Task pred : task.pred) {
-                maxPriority = Math.max(maxPriority, pred.dependencyPriority);
-            }
-            task.dependencyPriority = maxPriority;
-        }
-    }
-
-    public void calculateRank() {
-        if (sortedTasks == null)
-            topologicalSort();
-
-        Collections.reverse(sortedTasks);
-        //递归调用计算
-        for (Task task : sortedTasks) {
-            task.rank = upwardRank(task);
-        }
-    }
-    private double upwardRank(Task task) {
-        if (task.suc.isEmpty()) {
-            return task.computationCost;
-        }
-        double maxRank = 0;
-        for (Task suc : task.suc) {
-            double rank = upwardRank(suc) + task.communicationCosts.get(suc); //到时候加除以处理器的speed
-            maxRank = Math.max(maxRank, rank);
-        }
-        return maxRank + task.computationCost;
     }
 
     /**

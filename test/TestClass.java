@@ -32,7 +32,7 @@ public class TestClass {
 //
 //        scheduler.schedule();
 
-        dag.calculateRank();
+//        dag.calculateRank();
 //        dag.printGraph();
     }
 }
