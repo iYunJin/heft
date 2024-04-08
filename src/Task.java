@@ -19,6 +19,10 @@ public class Task {
     double rank;
     double priority;
 
+    private boolean isScheduled;
+    private boolean isVisited;
+    private boolean isCritical;
+
     // 后继节点
     List<Task> suc;
     // 前驱节点
@@ -28,6 +32,9 @@ public class Task {
 
     public Task(String name, int computationCost) {
         this.name = name;
+        this.isCritical = false;
+        this.isScheduled = false;
+        this.isVisited = false;
         this.computationCost = computationCost;
         this.pred = new ArrayList<>();
         this.suc = new ArrayList<>();
@@ -82,4 +89,27 @@ public class Task {
         return priority;
     }
 
+    public boolean isScheduled() {
+        return isScheduled;
+    }
+
+    public void setScheduled(boolean scheduled) {
+        isScheduled = scheduled;
+    }
+
+    public boolean isVisited() {
+        return isVisited;
+    }
+
+    public void setVisited(boolean visited) {
+        isVisited = visited;
+    }
+
+    public boolean isCritical() {
+        return isCritical;
+    }
+
+    public void setCritical(boolean critical) {
+        isCritical = critical;
+    }
 }
