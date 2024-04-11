@@ -4,17 +4,18 @@ public class DAG {
     String name;
     Task entry;
     //存储图的邻接表
-    private final Map<Task, List<Task>> graph;
+    public final Map<Task, List<Task>> graph;
     public List<Task> sortedTasks;
-
-    Queue<Task> taskPriorityQueue;
+    Queue<Task> rt_task_priority_queue;
+    Queue<Task> task_priority_queue;
     /**
      * 构造函数
      */
     public DAG(String name) {
         this.name = name;
         graph = new HashMap<>();
-        taskPriorityQueue = new LinkedList<>();
+        rt_task_priority_queue = new LinkedList<>();
+        task_priority_queue = new LinkedList<>();
     }
 
     /**
@@ -98,7 +99,13 @@ public class DAG {
      * 遍历图,打印rank值
      */
     public void printGraph(){
-        //TODO
+        if (sortedTasks == null)
+            topologicalSort();
+
+        for(Task sortedTask : sortedTasks){
+            System.out.println(sortedTask.getName() + " rank:" + sortedTask.rank);
+            System.out.println(sortedTask.getName() + " dependencyPriority:" + sortedTask.dependencyPriority);
+        }
     }
 
     public void setEntry(Task entry) {

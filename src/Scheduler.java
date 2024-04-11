@@ -1,9 +1,9 @@
 import java.util.*;
 
-public class HEFTScheduler {
+public class Scheduler {
 
     private final Map<Task, Integer> earliestFinishTimes;
-    public HEFTScheduler() {
+    public Scheduler() {
         this.earliestFinishTimes = new HashMap<>();
     }
 
@@ -16,11 +16,15 @@ public class HEFTScheduler {
             dag.topologicalSort();
 
         for (Task task : dag.sortedTasks) {
+            int par = task.U * task.deadline + task.V * task.computationCost;
             int maxPriority = 0;
-            for (Task pred : task.pred) {
-                maxPriority = Math.max(maxPriority, pred.dependencyPriority);
+            for(Task task1:task.pred){
+                maxPriority = Math.max(maxPriority, task1.dependencyPriority);
             }
-            task.dependencyPriority = maxPriority;
+            if(task.isCritical)
+                task.dependencyPriority = maxPriority + par;
+            else
+                task.dependencyPriority = maxPriority;
         }
     }
 
@@ -36,6 +40,7 @@ public class HEFTScheduler {
         for (Task task : dag.sortedTasks) {
             task.rank = upwardRank(task);
         }
+        Collections.reverse(dag.sortedTasks);
     }
     private double upwardRank(Task task) {
         if (task.suc.isEmpty()) {
@@ -48,6 +53,69 @@ public class HEFTScheduler {
         }
         return maxRank + task.computationCost;
     }
+
+
+
+    /**
+     * 遍历节点，获取关键路径
+     */
+    public void getCriticalPath(DAG dag) {
+        if (dag.sortedTasks == null)
+            dag.topologicalSort();
+
+        for (Task task : dag.sortedTasks) {
+            if (task.isRTTask)
+                setCritical(task);
+        }
+
+        Set<Task> rt_tasks = new LinkedHashSet<>();
+        Set<Task> common_tasks = new LinkedHashSet<>();
+        Queue<Task> tmp = new LinkedList<>();
+        tmp.offer(dag.entry);
+
+//        dag.rt_task_priority_queue.add(dag.entry);
+        rt_tasks.add(dag.entry);
+
+        while(!tmp.isEmpty()){
+            Task taskNow = tmp.poll();
+            for(Task suc: taskNow.suc){
+                tmp.offer(suc);
+                if(suc.isCritical  && !suc.isScheduled){
+//                    dag.rt_task_priority_queue.add(suc);
+                    rt_tasks.add(suc);
+                }else if (!suc.isScheduled){
+//                    dag.task_priority_queue.add(suc);
+                    common_tasks.add(suc);
+                }
+
+                suc.isScheduled = true;
+            }
+        }
+
+
+
+
+        for(Task task: rt_tasks){
+            System.out.print(task.getName() + " ");
+        }
+        System.out.println();
+        for (Task task : common_tasks) {
+            System.out.print(task.getName() + " ");
+        }
+    }
+
+    private void setCritical(Task task){
+        task.isCritical = true;
+
+        if(task.pred.isEmpty())
+            return;
+
+        for(Task pred : task.pred){
+            setCritical(pred);
+        }
+    }
+
+
 
 
     /**

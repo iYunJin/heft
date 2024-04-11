@@ -18,7 +18,12 @@ public class Task {
     int makeSpan;
     double rank;
     double priority;
+    int U;
+    int V;
 
+    boolean isCritical;
+    boolean isScheduled;
+    boolean isRTTask;
     // 后继节点
     List<Task> suc;
     // 前驱节点
@@ -29,6 +34,8 @@ public class Task {
     public Task(String name, int computationCost) {
         this.name = name;
         this.computationCost = computationCost;
+        this.U = 1;
+        this.V = 1;
         this.pred = new ArrayList<>();
         this.suc = new ArrayList<>();
         this.communicationCosts = new HashMap<>();
