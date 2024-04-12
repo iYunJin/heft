@@ -54,56 +54,69 @@ public class Scheduler {
         return maxRank + task.computationCost;
     }
 
-
-
     /**
      * 遍历节点，获取关键路径
      */
     public void getCriticalPath(DAG dag) {
         if (dag.sortedTasks == null)
             dag.topologicalSort();
-
+        //设置关键路径
         for (Task task : dag.sortedTasks) {
             if (task.isRTTask)
                 setCritical(task);
         }
 
-        Set<Task> rt_tasks = new LinkedHashSet<>();
-        Set<Task> common_tasks = new LinkedHashSet<>();
-        Queue<Task> tmp = new LinkedList<>();
-        tmp.offer(dag.entry);
+        //分离关键路径和普通任务
+        DAG[] dags = separateTasks(dag);
 
-//        dag.rt_task_priority_queue.add(dag.entry);
-        rt_tasks.add(dag.entry);
-
-        while(!tmp.isEmpty()){
-            Task taskNow = tmp.poll();
-            for(Task suc: taskNow.suc){
-                tmp.offer(suc);
-                if(suc.isCritical  && !suc.isScheduled){
-//                    dag.rt_task_priority_queue.add(suc);
-                    rt_tasks.add(suc);
-                }else if (!suc.isScheduled){
-//                    dag.task_priority_queue.add(suc);
-                    common_tasks.add(suc);
-                }
-
-                suc.isScheduled = true;
-            }
-        }
+        dags[0].printGraph();
+        dags[1].printGraph();
 
 
-
-
-        for(Task task: rt_tasks){
-            System.out.print(task.getName() + " ");
-        }
-        System.out.println();
-        for (Task task : common_tasks) {
-            System.out.print(task.getName() + " ");
-        }
+//        Set<Task> rt_tasks = new LinkedHashSet<>();
+//        Set<Task> common_tasks = new LinkedHashSet<>();
+//        Queue<Task> tmp = new LinkedList<>();
+//        tmp.offer(dag.entry);
+//
+//        rt_tasks.add(dag.entry);
+//
+//        while(!tmp.isEmpty()){
+//            Task taskNow = tmp.poll();
+//            for(Task suc: taskNow.suc){
+//                tmp.offer(suc);
+//                if(suc.isCritical  && !suc.isScheduled){
+////                    dag.rt_task_priority_queue.add(suc);
+//                    rt_tasks.add(suc);
+//                }else if (!suc.isScheduled){
+////                    dag.task_priority_queue.add(suc);
+//                    common_tasks.add(suc);
+//                }
+//                suc.isScheduled = true;
+//            }
+//        }
+//
+//        DAG rt_dag = new DAG("rt_dag");
+//        DAG common_dag = new DAG("common_dag");
+//
+//        for(Task task: rt_tasks){
+//            rt_dag.addTask(task);
+//        }
+//
+//
+//
+//        for(Task task: rt_tasks){
+//            System.out.print(task.getName() + " ");
+//        }
+//        System.out.println();
+//        for (Task task : common_tasks) {
+//            System.out.print(task.getName() + " ");
+//        }
     }
 
+    /**
+     * 递归设置关键路径
+     * @param task 当前任务
+     */
     private void setCritical(Task task){
         task.isCritical = true;
 
@@ -115,6 +128,38 @@ public class Scheduler {
         }
     }
 
+    /**
+     * 分离关键路径和普通任务
+     * @param dag DAG图
+     * @return 分离后的DAG数组
+     */
+    private DAG[] separateTasks(DAG dag) {
+        DAG[] dags = new DAG[2];
+        dags[0] = new DAG("rt_dag");
+        dags[1] = new DAG("common_dag");
+
+        Task entry = new Task("virtual_entry", 0);
+        dags[1].addTask(entry);
+
+        for (Task task : dag.sortedTasks) {
+            if (task.isCritical) {
+                dags[0].addTask(task);
+                task.suc.removeIf(suc -> !suc.isCritical);
+            } else {
+                dags[1].addTask(task);
+                task.pred.removeIf(pred -> pred.isCritical);
+            }
+        }
+
+        dags[0].entry= dag.entry;
+        dags[1].topologicalSort();
+        dags[1].entry = entry;
+        for (Task task : dags[1].sortedTasks)
+            if (task.pred.isEmpty() && task != entry) {
+                dags[1].addDependency(entry, task, 0);
+            }
+        return dags;
+    }
 
 
 

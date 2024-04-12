@@ -23,7 +23,10 @@ public class DAG {
      */
     public void addTask(Task vertex) {
         if (!graph.containsKey(vertex)) {
-            graph.put(vertex, new ArrayList<>());
+            if (!vertex.suc.isEmpty())
+                graph.put(vertex, vertex.suc);
+            else
+                graph.put(vertex, new ArrayList<>());
         }
     }
 
@@ -58,6 +61,7 @@ public class DAG {
         for (Task task : graph.keySet()) {
             inDegrees.put(task, 0);
         }
+
         //计算入度
         for (List<Task> dependencies : graph.values()) {
             for (Task dependency : dependencies) {
@@ -103,8 +107,8 @@ public class DAG {
             topologicalSort();
 
         for(Task sortedTask : sortedTasks){
-            System.out.println(sortedTask.getName() + " rank:" + sortedTask.rank);
-            System.out.println(sortedTask.getName() + " dependencyPriority:" + sortedTask.dependencyPriority);
+            System.out.println(sortedTask.getName());
+//            System.out.println(sortedTask.getName() + " dependencyPriority:" + sortedTask.dependencyPriority);
         }
     }
 
