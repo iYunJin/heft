@@ -10,13 +10,13 @@ public class Task {
     private String name;
     int computationCost;
     int deadline;
-    int dependencyPriority;
+//    int dependencyPriority;
     // 最早开始时间
     int earliestStartTime;
 
     // makeSpan 任务完成时间
     int makeSpan;
-    double rank;
+    int rank;
     double priority;
     int U;
     int V;
@@ -77,9 +77,9 @@ public class Task {
         return deadline;
     }
 
-    public int getDependencyPriority() {
-        return dependencyPriority;
-    }
+//    public int getDependencyPriority() {
+//        return dependencyPriority;
+//    }
 
     public double getRank() {
         return rank;

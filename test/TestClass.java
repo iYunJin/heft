@@ -29,8 +29,8 @@ public class TestClass {
 //        System.out.println();
         dag.entry = t1;
         Scheduler scheduler = new Scheduler();
-        scheduler.calculateRank(dag);
-        scheduler.getCriticalPath(dag);
+//        scheduler.calculateRank(dag);
+        scheduler.TaskSort(dag);
 //        scheduler.calculateDependencyPriority(dag);
 //        dag.printGraph();
 //

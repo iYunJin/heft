@@ -107,7 +107,7 @@ public class DAG {
             topologicalSort();
 
         for(Task sortedTask : sortedTasks){
-            System.out.println(sortedTask.getName());
+            System.out.println(sortedTask.getName()+" priority "+ sortedTask.priority);
 //            System.out.println(sortedTask.getName() + " dependencyPriority:" + sortedTask.dependencyPriority);
         }
     }

@@ -11,27 +11,31 @@ public class Scheduler {
      * 计算依赖优先级,并将其存储在Task类的dependencyPriority中
      * 依赖优先级 = 前驱节点的依赖优先级最大值
      */
-    public void calculateDependencyPriority(DAG dag) {
+    public void calculateTaskPriority(DAG dag) {
         if (dag.sortedTasks == null)
             dag.topologicalSort();
 
         for (Task task : dag.sortedTasks) {
-            int par = task.U * task.deadline + task.V * task.computationCost;
-            int maxPriority = 0;
-            for(Task task1:task.pred){
-                maxPriority = Math.max(maxPriority, task1.dependencyPriority);
+            double par = task.U * task.deadline + task.V * task.computationCost;
+
+            if(task.isCritical){
+                task.priority = par;
+                continue;
             }
-            if(task.isCritical)
-                task.dependencyPriority = maxPriority + par;
-            else
-                task.dependencyPriority = maxPriority;
+
+            double maxPriority = 0;
+            for(Task task1:task.pred){
+                maxPriority = Math.max(maxPriority, task1.priority);
+            }
+
+            task.priority = maxPriority + par;
         }
     }
 
     /**
      * 计算任务的rank
      */
-    public void calculateRank(DAG dag) {
+    private void calculateRank(DAG dag) {
         if (dag.sortedTasks == null)
             dag.topologicalSort();
 
@@ -42,35 +46,45 @@ public class Scheduler {
         }
         Collections.reverse(dag.sortedTasks);
     }
-    private double upwardRank(Task task) {
+    private int upwardRank(Task task) {
         if (task.suc.isEmpty()) {
             return task.computationCost;
         }
-        double maxRank = 0;
+        int maxRank = 0;
         for (Task suc : task.suc) {
-            double rank = upwardRank(suc) + task.communicationCosts.get(suc);
+            int rank = upwardRank(suc) + task.communicationCosts.get(suc);
             maxRank = Math.max(maxRank, rank);
         }
         return maxRank + task.computationCost;
     }
 
+
     /**
      * 遍历节点，获取关键路径
      */
-    public void getCriticalPath(DAG dag) {
+    public void TaskSort(DAG dag) {
         if (dag.sortedTasks == null)
             dag.topologicalSort();
+
+//        calculateRank(dag);
         //设置关键路径
         for (Task task : dag.sortedTasks) {
-            if (task.isRTTask)
+            if (task.isRTTask) {
                 setCritical(task);
+                setDeadline(task);
+            }
         }
+        calculateTaskPriority(dag);
 
         //分离关键路径和普通任务
         DAG[] dags = separateTasks(dag);
 
-        dags[0].printGraph();
-        dags[1].printGraph();
+        dag.rt_task_priority_queue.offer(dags[0].entry);
+
+
+
+//        dags[0].printGraph();
+
 
 
 //        Set<Task> rt_tasks = new LinkedHashSet<>();
@@ -124,6 +138,20 @@ public class Scheduler {
             return;
 
         for(Task pred : task.pred){
+            setCritical(pred);
+        }
+    }
+
+    /**
+     * 设置deadline
+     * @param task 当前任务
+     */
+    private void setDeadline(Task task){
+        if(task.pred.isEmpty()){
+            return;
+        }
+        for(Task pred : task.pred) {
+            pred.deadline = Math.min(task.deadline,pred.deadline);
             setCritical(pred);
         }
     }
