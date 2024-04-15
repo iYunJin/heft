@@ -77,10 +77,6 @@ public class Task {
         return deadline;
     }
 
-//    public int getDependencyPriority() {
-//        return dependencyPriority;
-//    }
-
     public double getRank() {
         return rank;
     }
@@ -89,4 +85,7 @@ public class Task {
         return priority;
     }
 
+    public boolean isRTTask() {
+        return isRTTask;
+    }
 }

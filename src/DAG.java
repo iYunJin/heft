@@ -6,16 +6,18 @@ public class DAG {
     //存储图的邻接表
     public final Map<Task, List<Task>> graph;
     public List<Task> sortedTasks;
-    Queue<Task> rt_task_priority_queue;
-    Queue<Task> task_priority_queue;
+    public List<Task> sortedRTTasks;
+    public List<Task> sortedCommonTasks;
+//    Queue<Task> rt_task_priority_queue;
+//    Queue<Task> task_priority_queue;
     /**
      * 构造函数
      */
     public DAG(String name) {
         this.name = name;
         graph = new HashMap<>();
-        rt_task_priority_queue = new LinkedList<>();
-        task_priority_queue = new LinkedList<>();
+//        rt_task_priority_queue = new LinkedList<>();
+//        task_priority_queue = new LinkedList<>();
     }
 
     /**

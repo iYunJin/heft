@@ -28,9 +28,11 @@ public class TestClass {
 //        }
 //        System.out.println();
         dag.entry = t1;
-        Scheduler scheduler = new Scheduler();
+        TaskSort ts = new TaskSort();
 //        scheduler.calculateRank(dag);
-        scheduler.TaskSort(dag);
+        ts.DOTaskSort(dag);
+//        DagScheduler dagScheduler = new DagScheduler();
+//        dagScheduler.inQueue();
 //        scheduler.calculateDependencyPriority(dag);
 //        dag.printGraph();
 //
