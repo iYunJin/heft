@@ -19,7 +19,7 @@ public class DagScheduler {
     {
         if(dag.sortedCommonTasks == null | dag.sortedRTTasks ==null)
         {
-            new TaskSort().DOTaskSort(dag);
+            new TaskSort().DoTaskSort(dag);
         }
         rt_task_priority_queue.addAll(dag.sortedRTTasks);
         common_task_priority_queue.addAll(dag.sortedCommonTasks);

@@ -8,18 +8,18 @@ import java.util.Map;
  */
 public class Task {
     private String name;
+    int id;
     int computationCost;
     int deadline;
-//    int dependencyPriority;
-    // 最早开始时间
+
     int earliestStartTime;
 
     // makeSpan 任务完成时间
     int makeSpan;
     int rank;
     double priority;
-    int U;
-    int V;
+    double U;
+    double V;
 
     boolean isCritical;
     boolean isScheduled;
@@ -34,8 +34,8 @@ public class Task {
     public Task(String name, int computationCost) {
         this.name = name;
         this.computationCost = computationCost;
-        this.U = 1;
-        this.V = 1;
+        this.U = 0.5;
+        this.V = 0.5;
         this.pred = new ArrayList<>();
         this.suc = new ArrayList<>();
         this.communicationCosts = new HashMap<>();
@@ -65,27 +65,25 @@ public class Task {
     public void addPred(Task pred){
         this.pred.add(pred);
     }
-
     public String getName() {
         return name;
     }
     public int getComputationCost() {
         return computationCost;
     }
-
     public int getDeadline() {
         return deadline;
     }
-
     public double getRank() {
         return rank;
     }
-
     public double getPriority() {
         return priority;
     }
-
     public boolean isRTTask() {
         return isRTTask;
+    }
+    public int getId() {
+        return id;
     }
 }

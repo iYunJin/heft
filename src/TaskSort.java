@@ -8,52 +8,52 @@ public class TaskSort {
     }
 
 
-//    /**
-//     * 计算任务的rank
-//     */
-//    private void calculateRank(DAG dag) {
-//        if (dag.sortedTasks == null)
-//            dag.topologicalSort();
-//
-//        Collections.reverse(dag.sortedTasks);
-//        //递归调用计算
-//        for (Task task : dag.sortedTasks) {
-//            task.rank = upwardRank(task);
-//        }
-//        Collections.reverse(dag.sortedTasks);
-//    }
-//    private int upwardRank(Task task) {
-//        if (task.suc.isEmpty()) {
-//            return task.computationCost;
-//        }
-//        int maxRank = 0;
-//        for (Task suc : task.suc) {
-//            int rank = upwardRank(suc) + task.communicationCosts.get(suc);
-//            maxRank = Math.max(maxRank, rank);
-//        }
-//        return maxRank + task.computationCost;
-//    }
+    /**
+     * 计算任务的rank
+     */
+    public void calculateRank(DAG dag) {
+        if (dag.sortedTasks == null)
+            dag.topologicalSort();
+
+        Collections.reverse(dag.sortedTasks);
+        //递归调用计算
+        for (Task task : dag.sortedTasks) {
+            task.rank = upwardRank(task);
+        }
+        Collections.reverse(dag.sortedTasks);
+    }
+    private int upwardRank(Task task) {
+        if (task.suc.isEmpty()) {
+            return task.computationCost;
+        }
+        int maxRank = 0;
+        for (Task suc : task.suc) {
+            int rank = upwardRank(suc) + task.communicationCosts.get(suc);
+            maxRank = Math.max(maxRank, rank);
+        }
+        return maxRank + task.computationCost;
+    }
 
 
     /**
      * 遍历节点，获取关键路径
      */
-    public void DOTaskSort(DAG dag) {
+    public void DoTaskSort(DAG dag) {
         if (dag.sortedTasks == null)
             dag.topologicalSort();
 
+        calculateRank(dag);
         //设置关键路径
         for (Task task : dag.sortedTasks) {
             if (task.isRTTask) {
                 setCritical(task);
-                setDeadline(task);
             }
         }
+        //计算优先级
         calculateTaskPriority(dag);
-
         //分离关键路径和普通任务
         DAG[] dags = separateTasks(dag);
-
+        //排序
         do_sort(dags[0]);
         do_sort(dags[1]);
         dag.sortedRTTasks = dags[0].sortedTasks;
@@ -74,20 +74,19 @@ public class TaskSort {
             double par;
             if (task.isCritical) {
                 // 实时任务的优先级由截止时间和计算成本得出
-                par = task.U * task.deadline + task.V * task.computationCost;
+                par = task.U * task.deadline + task.V * task.rank;
             } else {
                 // 普通任务的优先级由前置任务里是否有实时任务和计算成本决定
                 boolean hasRTTaskPred = task.pred.stream().anyMatch(Task::isRTTask);
-                par = task.U * (hasRTTaskPred ? 1 : 0) + task.V * task.computationCost;
+                par = task.U * (hasRTTaskPred ? 50 : 0) + task.V * task.rank;
             }
 
-            double maxPriority = 0;
-
-            for (Task task1 : task.pred) {
-                maxPriority = Math.max(maxPriority, task1.priority);
-            }
-
-            task.priority = maxPriority + par;
+//            double maxPriority = 0;
+//
+//            for (Task task1 : task.pred) {
+//                maxPriority = Math.max(maxPriority, task1.priority);
+//            }
+            task.priority =  par;
         }
     }
 
@@ -103,21 +102,7 @@ public class TaskSort {
             return;
 
         for(Task pred : task.pred){
-            setCritical(pred);
-        }
-    }
-
-
-    /**
-     * 设置deadline
-     * @param task 当前任务
-     */
-    private void setDeadline(Task task){
-        if(task.pred.isEmpty()){
-            return;
-        }
-        for(Task pred : task.pred) {
-            pred.deadline = Math.min(task.deadline,pred.deadline);
+            pred.deadline = pred.deadline == 0 ? task.deadline :Math.min(task.deadline,pred.deadline);
             setCritical(pred);
         }
     }
@@ -128,6 +113,7 @@ public class TaskSort {
      * @return 分离后的DAG数组
      */
     private DAG[] separateTasks(DAG dag) {
+        int commonNum=0,rtNum=0;
         DAG[] dags = new DAG[2];
         dags[0] = new DAG("rt_dag");
         dags[1] = new DAG("common_dag");
@@ -138,8 +124,10 @@ public class TaskSort {
         for (Task task : dag.sortedTasks) {
             if (task.isCritical) {
                 dags[0].addTask(task);
+                rtNum++;
                 task.suc.removeIf(suc -> !suc.isCritical);
             } else {
+                commonNum++;
                 dags[1].addTask(task);
                 task.pred.removeIf(pred -> pred.isCritical);
             }
@@ -152,6 +140,8 @@ public class TaskSort {
             if (task.pred.isEmpty() && task != entry) {
                 dags[1].addDependency(entry, task, 0);
             }
+        dag.rtTaskNum = rtNum;
+        dag.commonTaskNum = commonNum;
         return dags;
     }
 
@@ -183,15 +173,6 @@ public class TaskSort {
 
         dag.sortedTasks = scheduledTasks;
     }
-
-    /**
-     * 调度,将排序好的任务加入到
-     */
-    private void inQueue(Queue<Task> queue, Task task) {
-        if (!queue.contains(task))
-            queue.add(task);
-    }
-
 
 //    public void calculateEarliestStartTime(DAG dag,Processor processor) {
 //        if (dag.sortedTasks == null)

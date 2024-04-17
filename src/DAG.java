@@ -5,19 +5,20 @@ public class DAG {
     Task entry;
     //存储图的邻接表
     public final Map<Task, List<Task>> graph;
+    int TaskNum;
+    public int rtTaskNum;
+    public int commonTaskNum;
     public List<Task> sortedTasks;
     public List<Task> sortedRTTasks;
     public List<Task> sortedCommonTasks;
-//    Queue<Task> rt_task_priority_queue;
-//    Queue<Task> task_priority_queue;
+
+
     /**
      * 构造函数
      */
     public DAG(String name) {
         this.name = name;
         graph = new HashMap<>();
-//        rt_task_priority_queue = new LinkedList<>();
-//        task_priority_queue = new LinkedList<>();
     }
 
     /**
@@ -29,6 +30,7 @@ public class DAG {
                 graph.put(vertex, vertex.suc);
             else
                 graph.put(vertex, new ArrayList<>());
+            vertex.id = TaskNum++;
         }
     }
 
@@ -51,12 +53,10 @@ public class DAG {
         return new ArrayList<>(graph.keySet());
     }
 
-
     /**
      * 拓扑排序
-     * @return 排序后的集合
      */
-    public List<Task> topologicalSort() {
+    public void topologicalSort() {
         Map<Task, Integer> inDegrees = new HashMap<>();
 
         //初始化入度
@@ -97,9 +97,8 @@ public class DAG {
         if (sortedTasks.size() != graph.size()) {
             throw new IllegalStateException("Graph has a cycle");
         }
-
-        return sortedTasks;
     }
+
 
     /**
      * 遍历图,打印rank值
@@ -109,6 +108,8 @@ public class DAG {
             topologicalSort();
 
         for(Task sortedTask : sortedTasks){
+            System.out.println(sortedTask.getName()+" rank "+ sortedTask.rank);
+            System.out.println(sortedTask.getName()+" deadline "+ sortedTask.deadline);
             System.out.println(sortedTask.getName()+" priority "+ sortedTask.priority);
 //            System.out.println(sortedTask.getName() + " dependencyPriority:" + sortedTask.dependencyPriority);
         }
