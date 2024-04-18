@@ -1,9 +1,9 @@
 import java.util.*;
 
-public class TaskSort {
+public class NodeSort {
 
 //    private final Map<Task, Integer> earliestFinishTimes;
-    public TaskSort() {
+    public NodeSort() {
 //        this.earliestFinishTimes = new HashMap<>();
     }
 
@@ -17,17 +17,17 @@ public class TaskSort {
 
         Collections.reverse(dag.sortedTasks);
         //递归调用计算
-        for (Task task : dag.sortedTasks) {
+        for (Node task : dag.sortedTasks) {
             task.rank = upwardRank(task);
         }
         Collections.reverse(dag.sortedTasks);
     }
-    private int upwardRank(Task task) {
+    private int upwardRank(Node task) {
         if (task.suc.isEmpty()) {
             return task.computationCost;
         }
         int maxRank = 0;
-        for (Task suc : task.suc) {
+        for (Node suc : task.suc) {
             int rank = upwardRank(suc) + task.communicationCosts.get(suc);
             maxRank = Math.max(maxRank, rank);
         }
@@ -44,7 +44,7 @@ public class TaskSort {
 
         calculateRank(dag);
         //设置关键路径
-        for (Task task : dag.sortedTasks) {
+        for (Node task : dag.sortedTasks) {
             if (task.isRTTask) {
                 setCritical(task);
             }
@@ -70,14 +70,14 @@ public class TaskSort {
         if (dag.sortedTasks == null)
             dag.topologicalSort();
 
-        for (Task task : dag.sortedTasks) {
+        for (Node task : dag.sortedTasks) {
             double par;
             if (task.isCritical) {
                 // 实时任务的优先级由截止时间和计算成本得出
                 par = task.U * task.deadline + task.V * task.rank;
             } else {
                 // 普通任务的优先级由前置任务里是否有实时任务和计算成本决定
-                boolean hasRTTaskPred = task.pred.stream().anyMatch(Task::isRTTask);
+                boolean hasRTTaskPred = task.pred.stream().anyMatch(Node::isRTTask);
                 par = task.U * (hasRTTaskPred ? 50 : 0) + task.V * task.rank;
             }
 
@@ -95,13 +95,13 @@ public class TaskSort {
      * 递归设置关键路径
      * @param task 当前任务
      */
-    private void setCritical(Task task){
+    private void setCritical(Node task){
         task.isCritical = true;
 
         if(task.pred.isEmpty())
             return;
 
-        for(Task pred : task.pred){
+        for(Node pred : task.pred){
             pred.deadline = pred.deadline == 0 ? task.deadline :Math.min(task.deadline,pred.deadline);
             setCritical(pred);
         }
@@ -118,10 +118,10 @@ public class TaskSort {
         dags[0] = new DAG("rt_dag");
         dags[1] = new DAG("common_dag");
 
-        Task entry = new Task("virtual_entry", 0);
+        Node entry = new Node("virtual_entry", 0,null);
         dags[1].addTask(entry);
 
-        for (Task task : dag.sortedTasks) {
+        for (Node task : dag.sortedTasks) {
             if (task.isCritical) {
                 dags[0].addTask(task);
                 rtNum++;
@@ -136,7 +136,7 @@ public class TaskSort {
         dags[0].entry= dag.entry;
         dags[1].topologicalSort();
         dags[1].entry = entry;
-        for (Task task : dags[1].sortedTasks)
+        for (Node task : dags[1].sortedTasks)
             if (task.pred.isEmpty() && task != entry) {
                 dags[1].addDependency(entry, task, 0);
             }
@@ -153,16 +153,16 @@ public class TaskSort {
         if(dag.sortedTasks == null)
             dag.topologicalSort();
 
-        PriorityQueue<Task> taskQueue = new PriorityQueue<>((t1, t2) -> Double.compare(t2.getPriority(), t1.getPriority()));
+        PriorityQueue<Node> taskQueue = new PriorityQueue<>((t1, t2) -> Double.compare(t2.getPriority(), t1.getPriority()));
 
         taskQueue.addAll(dag.sortedTasks);
 
-        List<Task> scheduledTasks = new ArrayList<>();
+        List<Node> scheduledTasks = new ArrayList<>();
 
         while (!taskQueue.isEmpty()) {
-            Iterator<Task> iterator = taskQueue.iterator();
+            Iterator<Node> iterator = taskQueue.iterator();
             while (iterator.hasNext()) {
-                Task task = iterator.next();
+                Node task = iterator.next();
                 if (new HashSet<>(scheduledTasks).containsAll(task.pred)) {
                     scheduledTasks.add(task);
                     iterator.remove();

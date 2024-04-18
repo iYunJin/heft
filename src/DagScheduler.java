@@ -2,8 +2,8 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class DagScheduler {
-    public Queue<Task> rt_task_priority_queue;
-    public Queue<Task> common_task_priority_queue;
+    public Queue<Node> rt_task_priority_queue;
+    public Queue<Node> common_task_priority_queue;
 
 //    public DAG dag;
 
@@ -19,7 +19,7 @@ public class DagScheduler {
     {
         if(dag.sortedCommonTasks == null | dag.sortedRTTasks ==null)
         {
-            new TaskSort().DoTaskSort(dag);
+            new NodeSort().DoTaskSort(dag);
         }
         rt_task_priority_queue.addAll(dag.sortedRTTasks);
         common_task_priority_queue.addAll(dag.sortedCommonTasks);

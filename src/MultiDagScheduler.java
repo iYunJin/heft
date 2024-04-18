@@ -8,12 +8,14 @@ public class MultiDagScheduler{
     int CommonTaskNum;
     private List<DagScheduler> schedulers;
     private List<DAG> dags;
-    public Queue<Task> ready_queue;
+    private List<Processor> processors;
+    public Queue<Node> ready_queue;
 
     public MultiDagScheduler() {
         schedulers = new ArrayList<>();
         dags = new ArrayList<>();
         ready_queue = new LinkedList<>();
+        processors = new ArrayList<>();
     }
 
     public void addDag(DAG dag) {
@@ -33,9 +35,9 @@ public class MultiDagScheduler{
         }
     }
 
-    public void schedule() {
+    public void task_in_queue() {
         while(RtTaskNum > 0) {
-            Task inTask = null;
+            Node inTask = null;
             DagScheduler tmpScheduler = null;
             for (DagScheduler scheduler : schedulers) {
                 if (scheduler.rt_task_priority_queue.isEmpty())
@@ -58,7 +60,7 @@ public class MultiDagScheduler{
         }
 
         while(CommonTaskNum > 0) {
-            Task inTask = null;
+            Node inTask = null;
             DagScheduler tmpScheduler = null;
             for (DagScheduler scheduler : schedulers) {
                 if (scheduler.common_task_priority_queue.isEmpty())
@@ -80,4 +82,71 @@ public class MultiDagScheduler{
         }
 
     }
+
+    /**
+     * 添加处理器
+     * @param processor 处理器
+     */
+    public void addProcessor(Processor processor) {
+        processors.add(processor);
+    }
+
+    /**
+     * 调度任务到处理器
+     */
+    public void scheduleTasks() {
+        while (!ready_queue.isEmpty()) {
+            // 从队列中取出任务
+            Node task = ready_queue.poll();
+
+            // 找到一个可用的处理器
+            Processor minEftProcessor = findMinEFTProcessor(task);
+            if (minEftProcessor == null) {
+                // 如果没有可用的处理器，就等待一会儿
+                try {
+                    Thread.sleep(1000); // 等待1秒
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                continue;
+            }
+
+            // 将任务调度到处理器
+            minEftProcessor.schedule(task);
+        }
+    }
+
+//    /**
+//     * 查找一个可用的处理器
+//     * @return 可用的处理器
+//     */
+//    private Processor findAvailableProcessor() {
+//        for (Processor processor : processors) {
+//            if (processor.isAvailable()) {
+//                return processor;
+//            }
+//        }
+//        return null;
+//    }
+
+    /**
+     * 查找具有最小EFT的处理器
+     *
+     * @param task 要调度的任务
+     * @return 具有最小EFT的处理器
+     */
+    private Processor findMinEFTProcessor(Node task) {
+        Processor minEftProcessor = null;
+        int minEft = Integer.MAX_VALUE;
+        for (Processor processor : processors) {
+            int eft = processor.calculateEFT(task);
+            if (eft < minEft) {
+                minEft = eft;
+                minEftProcessor = processor;
+            }
+        }
+        return minEftProcessor;
+    }
+
+
 }
