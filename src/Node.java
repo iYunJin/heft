@@ -22,10 +22,11 @@ public class Node {
     double V;
 
     private boolean isCompleted;
+    private Task task;
     boolean isCritical;
     boolean isScheduled;
     boolean isRTTask;
-    Task task;
+//    Task task;
     // 后继节点
     List<Node> suc;
     // 前驱节点
@@ -70,10 +71,11 @@ public class Node {
     }
 
     public void execute(){
+        System.out.println("task "+this.name+" is running\n");
         if(task!=null) {
             task.run();
-            complete();
         }
+        complete();
     }
 
     public String getName() {
@@ -113,7 +115,21 @@ public class Node {
     /**
      * 标记任务为已完成
      */
-    public void complete() {
+    private void complete() {
         this.isCompleted = true;
+    }
+
+    /**
+     * 检查所有依赖任务是否都已经完成
+     *
+     * @return 如果所有依赖任务都已经完成，返回true，否则返回false
+     */
+    public boolean allDependenciesCompleted() {
+        for (Node dependency : this.pred) {
+            if (!dependency.isCompleted()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

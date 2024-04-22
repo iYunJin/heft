@@ -58,8 +58,6 @@ public class NodeSort {
         do_sort(dags[1]);
         dag.sortedRTTasks = dags[0].sortedTasks;
         dag.sortedCommonTasks = dags[1].sortedTasks;
-//        dags[0].printGraph();
-//        dags[1].printGraph();
     }
 
     /**
@@ -81,11 +79,6 @@ public class NodeSort {
                 par = task.U * (hasRTTaskPred ? 50 : 0) + task.V * task.rank;
             }
 
-//            double maxPriority = 0;
-//
-//            for (Task task1 : task.pred) {
-//                maxPriority = Math.max(maxPriority, task1.priority);
-//            }
             task.priority =  par;
         }
     }
@@ -120,6 +113,7 @@ public class NodeSort {
 
         Node entry = new Node("virtual_entry", 0,null);
         dags[1].addTask(entry);
+        commonNum++;
 
         for (Node task : dag.sortedTasks) {
             if (task.isCritical) {
@@ -173,17 +167,4 @@ public class NodeSort {
 
         dag.sortedTasks = scheduledTasks;
     }
-
-//    public void calculateEarliestStartTime(DAG dag,Processor processor) {
-//        if (dag.sortedTasks == null)
-//            dag.topologicalSort();
-////        for(Task task : sortedTasks){
-////            int maxStartTime = 0;
-////            for(Task pred : task.pred){
-////                maxStartTime = Math.max(maxStartTime, earliestFinishTimes.get(pred)+pred.communicationCosts.get(task));
-////            }
-////            task.earliestStartTime = maxStartTime;
-////            earliestFinishTimes.put(task, maxStartTime + task.computationCost);
-////        }
-//    }
 }

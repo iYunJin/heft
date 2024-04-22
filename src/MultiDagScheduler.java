@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class MultiDagScheduler{
     int RtTaskNum;
@@ -14,7 +15,7 @@ public class MultiDagScheduler{
     public MultiDagScheduler() {
         schedulers = new ArrayList<>();
         dags = new ArrayList<>();
-        ready_queue = new LinkedList<>();
+        ready_queue = new ConcurrentLinkedQueue<>();
         processors = new ArrayList<>();
     }
 
@@ -23,9 +24,9 @@ public class MultiDagScheduler{
     }
 
     /**
-     * dag节点入列
+     * 根据已添加的dag进行任务的排序和分离入列。
      */
-    public void inQueue() {
+    public void task_job() {
         for (DAG dag : dags) {
             DagScheduler scheduler = new DagScheduler();
             schedulers.add(scheduler);
@@ -35,6 +36,9 @@ public class MultiDagScheduler{
         }
     }
 
+    /**
+     * 所有dag任务入列
+     */
     public void task_in_queue() {
         while(RtTaskNum > 0) {
             Node inTask = null;
@@ -97,7 +101,14 @@ public class MultiDagScheduler{
     public void scheduleTasks() {
         while (!ready_queue.isEmpty()) {
             // 从队列中取出任务
-            Node task = ready_queue.poll();
+//            Node task = ready_queue.poll();
+            Node task = ready_queue.peek();
+            // 检查任务的所有依赖任务是否都已经完成
+            if (!task.allDependenciesCompleted()) {
+                // 如果任务的依赖任务还没有完成，那么跳过这个任务
+                continue;
+            }
+
 
             // 找到一个可用的处理器
             Processor minEftProcessor = findMinEFTProcessor(task);
@@ -110,24 +121,11 @@ public class MultiDagScheduler{
                 }
                 continue;
             }
-
             // 将任务调度到处理器
             minEftProcessor.schedule(task);
+            ready_queue.poll();
         }
     }
-
-//    /**
-//     * 查找一个可用的处理器
-//     * @return 可用的处理器
-//     */
-//    private Processor findAvailableProcessor() {
-//        for (Processor processor : processors) {
-//            if (processor.isAvailable()) {
-//                return processor;
-//            }
-//        }
-//        return null;
-//    }
 
     /**
      * 查找具有最小EFT的处理器
@@ -147,6 +145,4 @@ public class MultiDagScheduler{
         }
         return minEftProcessor;
     }
-
-
 }
