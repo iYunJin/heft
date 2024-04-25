@@ -92,15 +92,11 @@ public class TestTaskScheduling {
         multiDagScheduler.task_job();
         multiDagScheduler.task_in_queue();
 
-//        for(Node task: multiDagScheduler.ready_queue){
-//            System.out.println(task.getName());
-//        }
-//        final long start = System.currentTimeMillis();
+
         // 创建三个线程，每个线程模拟一个处理器
         Thread thread1 = new Thread(() -> {
-            while (!multiDagScheduler.rt_ready_queue.isEmpty() ||!multiDagScheduler.cm_ready_queue.isEmpty()|| !processor1.taskQueue.isEmpty()) {
-//                long end = System.currentTimeMillis() - start;
-//                System.out.println("processor1 start "+end);
+            while (!multiDagScheduler.ready_queue.isEmpty() || !processor1.taskQueue.isEmpty()) {
+
                 processor1.execute();
                 try {
                     sleep(1); // 等待1m
@@ -111,9 +107,7 @@ public class TestTaskScheduling {
         });
 
         Thread thread2 = new Thread(() -> {
-            while (!multiDagScheduler.rt_ready_queue.isEmpty() ||!multiDagScheduler.cm_ready_queue.isEmpty()|| !processor2.taskQueue.isEmpty()) {
-//                long end = System.currentTimeMillis() - start;
-//                System.out.println("processor1 start "+end);
+            while (!multiDagScheduler.ready_queue.isEmpty() || !processor2.taskQueue.isEmpty()) {
                 processor2.execute();
                 try {
                     sleep(1); // 等待1m
@@ -124,9 +118,7 @@ public class TestTaskScheduling {
         });
 
         Thread thread3 = new Thread(() -> {
-            while (!multiDagScheduler.rt_ready_queue.isEmpty() ||!multiDagScheduler.cm_ready_queue.isEmpty()|| !processor3.taskQueue.isEmpty()) {
-//                long end = System.currentTimeMillis() - start;
-//                System.out.println("processor1 start "+end);
+            while (!multiDagScheduler.ready_queue.isEmpty()|| !processor3.taskQueue.isEmpty()) {
                 processor3.execute();
                 try {
                     sleep(1); // 等待1m

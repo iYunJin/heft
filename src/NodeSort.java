@@ -53,7 +53,7 @@ public class NodeSort {
         calculateTaskPriority(dag);
         //分离关键路径和普通任务
         DAG[] dags = separateTasks(dag);
-        //排序
+//        排序
         do_sort(dags[0]);
         do_sort(dags[1]);
         dag.sortedRTTasks = dags[0].sortedTasks;
@@ -168,6 +168,7 @@ public class NodeSort {
                 }
             }
         }
+
         dag.sortedTasks = scheduledTasks;
     }
 }

@@ -29,7 +29,7 @@ public class Node {
     List<Node> suc;
     // 前驱节点
     List<Node> pred;
-//    List<Node> usedPred;
+    List<Node> usedPred;
     // 通信代价
     Map<Node,Integer> communicationCosts;
 
@@ -39,6 +39,7 @@ public class Node {
         this.U = 0.5;
         this.V = 0.5;
         this.pred = new ArrayList<>();
+        this.usedPred = new ArrayList<>();
         this.suc = new ArrayList<>();
         this.communicationCosts = new HashMap<>();
         this.task = task;
@@ -67,6 +68,7 @@ public class Node {
      */
     public void addPred(Node pred){
         this.pred.add(pred);
+        this.usedPred.add(pred);
     }
 
     public void execute() {
@@ -124,7 +126,7 @@ public class Node {
      * @return 如果所有依赖任务都已经完成，返回true，否则返回false
      */
     public boolean allDependenciesCompleted() {
-        for (Node dependency : this.pred)
+        for (Node dependency : this.usedPred)
             if (!dependency.isCompleted())
                 return false;
         return true;
