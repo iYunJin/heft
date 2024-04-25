@@ -29,6 +29,7 @@ public class Node {
     List<Node> suc;
     // 前驱节点
     List<Node> pred;
+//    List<Node> usedPred;
     // 通信代价
     Map<Node,Integer> communicationCosts;
 

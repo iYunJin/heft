@@ -130,10 +130,13 @@ public class NodeSort {
         dags[0].entry= dag.entry;
         dags[1].topologicalSort();
         dags[1].entry = entry;
-        for (Node task : dags[1].sortedTasks)
+
+        //添加虚拟入口节点
+        for (Node task : dags[1].sortedTasks) {
             if (task.pred.isEmpty() && task != entry) {
                 dags[1].addDependency(entry, task, 0);
             }
+        }
         dag.rtTaskNum = rtNum;
         dag.commonTaskNum = commonNum;
         return dags;
@@ -154,6 +157,7 @@ public class NodeSort {
         List<Node> scheduledTasks = new ArrayList<>();
 
         while (!taskQueue.isEmpty()) {
+
             Iterator<Node> iterator = taskQueue.iterator();
             while (iterator.hasNext()) {
                 Node task = iterator.next();
@@ -164,7 +168,6 @@ public class NodeSort {
                 }
             }
         }
-
         dag.sortedTasks = scheduledTasks;
     }
 }

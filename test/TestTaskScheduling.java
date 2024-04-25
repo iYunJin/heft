@@ -98,7 +98,7 @@ public class TestTaskScheduling {
 //        final long start = System.currentTimeMillis();
         // 创建三个线程，每个线程模拟一个处理器
         Thread thread1 = new Thread(() -> {
-            while (!multiDagScheduler.ready_queue.isEmpty() || !processor1.taskQueue.isEmpty()) {
+            while (!multiDagScheduler.rt_ready_queue.isEmpty() ||!multiDagScheduler.cm_ready_queue.isEmpty()|| !processor1.taskQueue.isEmpty()) {
 //                long end = System.currentTimeMillis() - start;
 //                System.out.println("processor1 start "+end);
                 processor1.execute();
@@ -111,7 +111,7 @@ public class TestTaskScheduling {
         });
 
         Thread thread2 = new Thread(() -> {
-            while (!multiDagScheduler.ready_queue.isEmpty() || !processor2.taskQueue.isEmpty()) {
+            while (!multiDagScheduler.rt_ready_queue.isEmpty() ||!multiDagScheduler.cm_ready_queue.isEmpty()|| !processor2.taskQueue.isEmpty()) {
 //                long end = System.currentTimeMillis() - start;
 //                System.out.println("processor1 start "+end);
                 processor2.execute();
@@ -124,7 +124,7 @@ public class TestTaskScheduling {
         });
 
         Thread thread3 = new Thread(() -> {
-            while (!multiDagScheduler.ready_queue.isEmpty() || !processor3.taskQueue.isEmpty()) {
+            while (!multiDagScheduler.rt_ready_queue.isEmpty() ||!multiDagScheduler.cm_ready_queue.isEmpty()|| !processor3.taskQueue.isEmpty()) {
 //                long end = System.currentTimeMillis() - start;
 //                System.out.println("processor1 start "+end);
                 processor3.execute();
@@ -136,6 +136,7 @@ public class TestTaskScheduling {
             }
         });
 
+
         // 启动线程
         thread1.start();
         thread2.start();
@@ -144,7 +145,10 @@ public class TestTaskScheduling {
         dag.getTime();
         dag2.getTime();
         // 主线程继续调度任务
+
         multiDagScheduler.scheduleTasks();
+//        multiDagScheduler.cm_task_in_queue();
+//        multiDagScheduler.scheduleTasks();
 
         // 等待所有线程完成
         thread1.join();
