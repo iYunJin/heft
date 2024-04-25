@@ -6,12 +6,16 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class Processor {
     private String name;
-    private int cost;
     Queue<Node> taskQueue;
     private Node currentTask;
     int speed;
-    long now_time;
     public Processor() {
+        this.name = "Processor";
+        taskQueue = new ConcurrentLinkedQueue<>();
+        currentTask = null;
+    }
+    public Processor(String name) {
+        this.name = name;
         taskQueue = new ConcurrentLinkedQueue<>();
         currentTask = null;
     }
@@ -25,7 +29,6 @@ public class Processor {
         int eft = 0;
         for (Node task : taskQueue) {
             eft += task.getExecutionTime();
-//            taskQueue.
         }
         if (currentTask != null) {
             eft += currentTask.getExecutionTime();
@@ -35,23 +38,12 @@ public class Processor {
     }
 
     /**
-     * 检查处理器是否可用
-     *
-     * @return 如果处理器可用，返回true，否则返回false
-     */
-    public boolean isAvailable() {
-        // 如果当前没有正在执行的任务，那么处理器就是可用的
-        return currentTask == null;
-    }
-
-
-    /**
      * 将任务调度到处理器
      * @param task 要调度的任务
      */
     public void schedule(Node task) {
         taskQueue.offer(task);
-        task.setProcessor(this);
+        task.setProcessor(this.name);
 //        eft += task.computationCost;
 //        if (!taskQueue.isEmpty()) {
 //            eft += task.communicationCost;
@@ -62,22 +54,19 @@ public class Processor {
      * 执行处理器的下一个任务
      */
     public void execute() {
-        if(currentTask == null && taskQueue.isEmpty()) {
+        if(taskQueue.isEmpty()) {
             return;
         }
         // 如果当前没有正在执行的任务，那么从任务队列中取出一个任务开始执行
-        if(currentTask == null || currentTask.isCompleted()) {
-
-            currentTask = taskQueue.poll();
-
-            if (currentTask != null) {
-                currentTask.isScheduled = true;
-                currentTask.actualStartTime = System.currentTimeMillis();
-//            System.out.println(Thread.currentThread().getName()+ " is tasking ");
-                currentTask.execute();
-                currentTask.actualFinishTime = System.currentTimeMillis();
-            }
-        }
+//        if(currentTask == null || currentTask.isCompleted()) {
+        currentTask = taskQueue.poll();
+//        if (currentTask != null) {
+        currentTask.isScheduled = true;
+        currentTask.actualStartTime = System.currentTimeMillis();
+        currentTask.execute();
+        currentTask.actualFinishTime = System.currentTimeMillis();
+//        }
+//        }
     }
 
     public String getName() {
@@ -86,9 +75,5 @@ public class Processor {
 
     public int getSpeed() {
         return speed;
-    }
-
-    public int getCost() {
-        return cost;
     }
 }

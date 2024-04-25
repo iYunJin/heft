@@ -9,7 +9,7 @@ import java.util.Map;
 public class Node {
 
     private String name;
-    private Processor processor;
+    private String processorName;
     int id;
     int computationCost;
     int deadline;
@@ -69,7 +69,7 @@ public class Node {
     }
 
     public void execute() {
-        System.out.println("task "+this.name+" is running\n");
+//        System.out.println("task "+this.name+" is running\n");
         if(task!=null) {
             task.run();
         }
@@ -123,20 +123,18 @@ public class Node {
      * @return 如果所有依赖任务都已经完成，返回true，否则返回false
      */
     public boolean allDependenciesCompleted() {
-        for (Node dependency : this.pred) {
-            if (!dependency.isCompleted()) {
+        for (Node dependency : this.pred)
+            if (!dependency.isCompleted())
                 return false;
-            }
-        }
         return true;
     }
 
-    public Processor getProcessor() {
-        return processor;
+    public String getProcessorName() {
+        return processorName;
     }
 
-    public void setProcessor(Processor processor) {
-        this.processor = processor;
+    public void setProcessor(String processor) {
+        this.processorName = processor;
     }
 
     public int getCommunicationCost(Node to){

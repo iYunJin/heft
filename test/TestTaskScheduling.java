@@ -7,11 +7,11 @@ public class TestTaskScheduling {
 
     public static void main(String[] args) throws InterruptedException {
         // 创建三个处理器，每个处理器的处理速度不同
-        Processor processor1 = new Processor();
+        Processor processor1 = new Processor("Processor1");
         processor1.speed = 1;
-        Processor processor2 = new Processor();
+        Processor processor2 = new Processor("Processor2");
         processor2.speed = 2;
-        Processor processor3 = new Processor();
+        Processor processor3 = new Processor("Processor3");
         processor3.speed = 3;
 
         // 创建一个多DAG调度器
@@ -25,7 +25,7 @@ public class TestTaskScheduling {
             @Override
             public void run(){
                 try {
-                    sleep(500);
+                    sleep(20);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -34,17 +34,17 @@ public class TestTaskScheduling {
 
         // 创建一个DAG，并添加到多DAG调度器中
         DAG dag = new DAG("dag1");
-        Node t1 = new Node("t1",8,task1);
-        Node t2 = new Node("t2",7,task1);
-        Node t3 = new Node("t3",10,task1);
-        Node t4 = new Node("t4",6,task1);
-        Node t5 = new Node("t5",9,task1);
-        Node t6 = new Node("t6",5,task1);
-        Node t7 = new Node("t7",11,task1);
-        Node t8 = new Node("t8",5,task1);
-        Node t9 = new Node("t9",12,task1);
-        Node t10 = new Node("t10",7,task1);
-        Node t11 = new Node("t11",4,task1);
+        Node t1 = new Node("a1",8,task1);
+        Node t2 = new Node("a2",7,task1);
+        Node t3 = new Node("a3",10,task1);
+        Node t4 = new Node("a4",6,task1);
+        Node t5 = new Node("a5",9,task1);
+        Node t6 = new Node("a6",5,task1);
+        Node t7 = new Node("a7",11,task1);
+        Node t8 = new Node("a8",5,task1);
+        Node t9 = new Node("a9",12,task1);
+        Node t10 = new Node("a10",7,task1);
+        Node t11 = new Node("a11",4,task1);
 
         t5.isRTTask = true;
         t7.isRTTask = true;
@@ -66,13 +66,13 @@ public class TestTaskScheduling {
         multiDagScheduler.addDag(dag);
 
         DAG dag2 = new DAG("dag1");
-        Node v1 = new Node("v1",8,task1);
-        Node v2 = new Node("v2",7,task1);
-        Node v3 = new Node("v3",10,task1);
-        Node v4 = new Node("v4",6,task1);
-        Node v5 = new Node("v5",9,task1);
-        Node v6 = new Node("v6",5,task1);
-        Node v7 = new Node("v7",11,task1);
+        Node v1 = new Node("b1",8,task1);
+        Node v2 = new Node("b2",7,task1);
+        Node v3 = new Node("b3",10,task1);
+        Node v4 = new Node("b4",6,task1);
+        Node v5 = new Node("b5",9,task1);
+        Node v6 = new Node("b6",5,task1);
+        Node v7 = new Node("b7",11,task1);
 
         v3.isRTTask = true;
         v4.isRTTask = true;
@@ -95,8 +95,6 @@ public class TestTaskScheduling {
 //        for(Node task: multiDagScheduler.ready_queue){
 //            System.out.println(task.getName());
 //        }
-
-
 //        final long start = System.currentTimeMillis();
         // 创建三个线程，每个线程模拟一个处理器
         Thread thread1 = new Thread(() -> {
@@ -143,6 +141,8 @@ public class TestTaskScheduling {
         thread2.start();
         thread3.start();
 
+        dag.getTime();
+        dag2.getTime();
         // 主线程继续调度任务
         multiDagScheduler.scheduleTasks();
 
@@ -152,6 +152,7 @@ public class TestTaskScheduling {
         thread3.join();
 
         // 打印调度结果
-
+        dag.printGraph();
+        dag2.printGraph();
     }
 }

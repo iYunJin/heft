@@ -12,6 +12,7 @@ public class DAG {
     public List<Node> sortedRTTasks;
     public List<Node> sortedCommonTasks;
 
+    long start;
 
     /**
      * 构造函数
@@ -100,6 +101,9 @@ public class DAG {
     }
 
 
+    public void getTime(){
+        start = System.currentTimeMillis();
+    }
     /**
      * 遍历图,打印rank值
      */
@@ -108,11 +112,12 @@ public class DAG {
             topologicalSort();
 
         for(Node sortedTask : sortedTasks){
-            System.out.println(sortedTask.getName()+" rank "+ sortedTask.rank);
-            System.out.println(sortedTask.getName()+" deadline "+ sortedTask.deadline);
-            System.out.println(sortedTask.getName()+" priority "+ sortedTask.priority);
-//            System.out.println(sortedTask.getName() + " dependencyPriority:" + sortedTask.dependencyPriority);
+
+            System.out.println(sortedTask.getName() + " start in "+sortedTask.getProcessorName()+" in " +
+                    "time " + (sortedTask.actualStartTime-start));
         }
+//            System.out.println(sortedTask.getName() + " dependencyPriority:" + sortedTask.dependencyPriority);
+
     }
 
     public void setEntry(Node entry) {
