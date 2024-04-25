@@ -10,6 +10,7 @@ public class Processor {
     Queue<Node> taskQueue;
     private Node currentTask;
     int speed;
+    long now_time;
     public Processor() {
         taskQueue = new ConcurrentLinkedQueue<>();
         currentTask = null;
@@ -24,6 +25,7 @@ public class Processor {
         int eft = 0;
         for (Node task : taskQueue) {
             eft += task.getExecutionTime();
+//            taskQueue.
         }
         if (currentTask != null) {
             eft += currentTask.getExecutionTime();
@@ -48,12 +50,11 @@ public class Processor {
      * @param task 要调度的任务
      */
     public void schedule(Node task) {
-        // 如果当前没有正在执行的任务，那么立即开始执行这个任务
-//        if (currentTask == null) {
-//            currentTask = task;
-//        } else {
-            // 否则，将任务添加到任务队列中，等待执行
         taskQueue.offer(task);
+        task.setProcessor(this);
+//        eft += task.computationCost;
+//        if (!taskQueue.isEmpty()) {
+//            eft += task.communicationCost;
 //        }
     }
 
@@ -65,24 +66,16 @@ public class Processor {
             return;
         }
         // 如果当前没有正在执行的任务，那么从任务队列中取出一个任务开始执行
-        if(currentTask == null) {
-            currentTask = taskQueue.poll();
-            currentTask.isScheduled = true;
-            currentTask.earliestStartTime = System.currentTimeMillis();
-            System.out.println(Thread.currentThread().getName()+ " is tasking ");
-            currentTask.execute();
-            return;
-        }
+        if(currentTask == null || currentTask.isCompleted()) {
 
-        // 如果当前正在执行的任务已经完成，那么从任务队列中取出一个任务开始执行
-        if (currentTask.isCompleted()) {
             currentTask = taskQueue.poll();
+
             if (currentTask != null) {
                 currentTask.isScheduled = true;
-
-                currentTask.earliestStartTime = System.currentTimeMillis();
-                System.out.println(Thread.currentThread().getName()+ " is tasking ");
+                currentTask.actualStartTime = System.currentTimeMillis();
+//            System.out.println(Thread.currentThread().getName()+ " is tasking ");
                 currentTask.execute();
+                currentTask.actualFinishTime = System.currentTimeMillis();
             }
         }
     }

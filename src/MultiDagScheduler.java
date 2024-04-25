@@ -11,12 +11,14 @@ public class MultiDagScheduler{
     private List<DAG> dags;
     private List<Processor> processors;
     public Queue<Node> ready_queue;
+    public Queue<Node> wait_queue;
 
     public MultiDagScheduler() {
         schedulers = new ArrayList<>();
         dags = new ArrayList<>();
         ready_queue = new ConcurrentLinkedQueue<>();
         processors = new ArrayList<>();
+        wait_queue = new LinkedList<>();
     }
 
     public void addDag(DAG dag) {
@@ -99,31 +101,47 @@ public class MultiDagScheduler{
      * 调度任务到处理器
      */
     public void scheduleTasks() {
-        while (!ready_queue.isEmpty()) {
+        Node task = null;
+        while (!ready_queue.isEmpty() || !wait_queue.isEmpty()) {
             // 从队列中取出任务
-//            Node task = ready_queue.poll();
-            Node task = ready_queue.peek();
-            // 检查任务的所有依赖任务是否都已经完成
-            if (!task.allDependenciesCompleted()) {
-                // 如果任务的依赖任务还没有完成，那么跳过这个任务
-                continue;
-            }
-
-
-            // 找到一个可用的处理器
-            Processor minEftProcessor = findMinEFTProcessor(task);
-            if (minEftProcessor == null) {
-                // 如果没有可用的处理器，就等待一会儿
-                try {
-                    Thread.sleep(1000); // 等待1秒
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+            if(!wait_queue.isEmpty()) {
+                task = wait_queue.peek();
+                if (task.allDependenciesCompleted()) {
+                    // 如果任务的依赖任务还没有完成，那么跳过这个任务
+                    Processor minEftProcessor = findMinEFTProcessor(task);
+                    if (minEftProcessor == null) {
+                        // 如果没有可用的处理器，就等待一会儿
+                        try {
+                            Thread.sleep(1000); // 等待1秒
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        continue;
+                    }
+                    // 将任务调度到处理器
+                    task = wait_queue.poll();
+                    minEftProcessor.schedule(task);
                 }
                 continue;
             }
-            // 将任务调度到处理器
-            minEftProcessor.schedule(task);
-            ready_queue.poll();
+            task = ready_queue.poll();
+            if (task.allDependenciesCompleted()) {
+                // 如果任务的依赖任务还没有完成，那么跳过这个任务
+                Processor minEftProcessor = findMinEFTProcessor(task);
+                if (minEftProcessor == null) {
+                    // 如果没有可用的处理器，就等待一会儿
+                    try {
+                        Thread.sleep(500); // 等待1秒
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    continue;
+                }
+                // 将任务调度到处理器
+                minEftProcessor.schedule(task);
+            } else {
+                wait_queue.offer(task);
+            }
         }
     }
 

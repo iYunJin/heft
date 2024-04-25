@@ -7,26 +7,24 @@ import java.util.Map;
  * 任务类
  */
 public class Node {
+
     private String name;
+    private Processor processor;
     int id;
     int computationCost;
     int deadline;
-
-    long earliestStartTime;
-
-    // makeSpan 任务完成时间
-    int makeSpan;
+    long actualStartTime;
+    long actualFinishTime;
     int rank;
     double priority;
     double U;
     double V;
-
     private boolean isCompleted;
     private Task task;
     boolean isCritical;
     boolean isScheduled;
     boolean isRTTask;
-//    Task task;
+
     // 后继节点
     List<Node> suc;
     // 前驱节点
@@ -70,7 +68,7 @@ public class Node {
         this.pred.add(pred);
     }
 
-    public void execute(){
+    public void execute() {
         System.out.println("task "+this.name+" is running\n");
         if(task!=null) {
             task.run();
@@ -131,5 +129,17 @@ public class Node {
             }
         }
         return true;
+    }
+
+    public Processor getProcessor() {
+        return processor;
+    }
+
+    public void setProcessor(Processor processor) {
+        this.processor = processor;
+    }
+
+    public int getCommunicationCost(Node to){
+        return communicationCosts.get(to);
     }
 }
