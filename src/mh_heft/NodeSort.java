@@ -1,12 +1,12 @@
+package mh_heft;
+
 import java.util.*;
 
 public class NodeSort {
 
-//    private final Map<Task, Integer> earliestFinishTimes;
     public NodeSort() {
 //        this.earliestFinishTimes = new HashMap<>();
     }
-
 
     /**
      * 计算任务的rank

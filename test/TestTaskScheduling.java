@@ -1,5 +1,4 @@
-import java.util.LinkedList;
-import java.util.Queue;
+import mh_heft.*;
 
 import static java.lang.Thread.sleep;
 
@@ -128,7 +127,6 @@ public class TestTaskScheduling {
             }
         });
 
-
         // 启动线程
         thread1.start();
         thread2.start();
@@ -138,7 +136,7 @@ public class TestTaskScheduling {
         dag2.getTime();
         // 主线程继续调度任务
 
-        multiDagScheduler.scheduleTasks();
+        multiDagScheduler.scheduleTasks2();
 //        multiDagScheduler.cm_task_in_queue();
 //        multiDagScheduler.scheduleTasks();
 

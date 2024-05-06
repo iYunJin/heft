@@ -1,25 +1,21 @@
+package mh_heft;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class MultiDagScheduler{
-//    int TaskNum;
     int RtTaskNum;
     int CommonTaskNum;
     private List<DagScheduler> schedulers;
     private List<DAG> dags;
     private List<Processor> processors;
     public Queue<Node> ready_queue;
-//    public Queue<Node> cm_ready_queue;
-
-    public Queue<Node> wait_queue;
 
     public MultiDagScheduler() {
         schedulers = new ArrayList<>();
         dags = new ArrayList<>();
         ready_queue = new ConcurrentLinkedQueue<>();
-//        cm_ready_queue = new ConcurrentLinkedQueue<>();
         processors = new ArrayList<>();
-        wait_queue = new ConcurrentLinkedQueue<>();
     }
 
     public void addDag(DAG dag) {
@@ -34,7 +30,6 @@ public class MultiDagScheduler{
             DagScheduler scheduler = new DagScheduler();
             schedulers.add(scheduler);
             scheduler.schedule(dag);
-//            TaskNum += dag.TaskNum;
             RtTaskNum += dag.rtTaskNum;
             CommonTaskNum += dag.commonTaskNum;
         }
@@ -103,37 +98,33 @@ public class MultiDagScheduler{
      * 调度任务到处理器
      */
     public void scheduleTasks() {
-        while (!ready_queue.isEmpty() || !wait_queue.isEmpty()) {
-
-            // 尝试调度等待队列中的任务
-            while (!wait_queue.isEmpty()) {
-                Iterator<Node> iterator = wait_queue.iterator();
-                while (iterator.hasNext()) {
-                    Node task = iterator.next();
-                    if (!task.allDependenciesCompleted()) {
-                        continue;
-                    }
-                    Processor minEftProcessor = findMinEFTProcessor(task);
-                    if (minEftProcessor != null) {
-                        minEftProcessor.schedule(task);
-                        iterator.remove();
-                    }
+        // 尝试调度等待队列中的任务
+        while (!ready_queue.isEmpty()) {
+            Iterator<Node> iterator = ready_queue.iterator();
+            while (iterator.hasNext()) {
+                Node task = iterator.next();
+                if (!task.allDependenciesCompleted()) {
+                    continue;
+                }
+                Processor minEftProcessor = findMinEFTProcessor(task);
+                if (minEftProcessor != null) {
+                    minEftProcessor.schedule(task);
+                    iterator.remove();
                 }
             }
+        }
+    }
 
-            // 从就绪队列中取出任务进行调度
-            if (!ready_queue.isEmpty()) {
-                Node task = ready_queue.poll();
-                if (task.allDependenciesCompleted()) {
-                    Processor minEftProcessor = findMinEFTProcessor(task);
-                    if (minEftProcessor != null) {
-                        // 将任务调度到处理器
-                        minEftProcessor.schedule(task);
-                    }
-                } else {
-                    // 如果任务的依赖任务还未完成，将任务加入等待队列
-                    wait_queue.offer(task);
+    public void scheduleTasks2() {
+        while (!ready_queue.isEmpty()) {
+            Node task = ready_queue.peek();
+            if (task.allDependenciesCompleted()) {
+                Processor minEftProcessor = findMinEFTProcessor(task);
+                if (minEftProcessor != null) {
+                    // 将任务调度到处理器
+                    minEftProcessor.schedule(task);
                 }
+                ready_queue.poll();
             }
         }
     }

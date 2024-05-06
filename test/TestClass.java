@@ -3,18 +3,18 @@ import org.junit.Test;
 public class TestClass {
     @Test
     public void test1(){
-//        DAG dag = new DAG("dag1");
-//        Node t1 = new Node("a",8,null);
-//        Node t2 = new Node("b",7,null);
-//        Node t3 = new Node("c",10,null);
-//        Node t4 = new Node("d",6,null);
-//        Node t5 = new Node("e",9,null);
-//        Node t6 = new Node("f",5,null);
-//        Node t7 = new Node("g",11,null);
-//        Node t8 = new Node("h",5,null);
-//        Node t9 = new Node("i",12,null);
-//        Node t10 = new Node("j",7,null);
-//        Node t11 = new Node("k",4,null);
+//        mh_heft.DAG dag = new mh_heft.DAG("dag1");
+//        mh_heft.Node t1 = new mh_heft.Node("a",8,null);
+//        mh_heft.Node t2 = new mh_heft.Node("b",7,null);
+//        mh_heft.Node t3 = new mh_heft.Node("c",10,null);
+//        mh_heft.Node t4 = new mh_heft.Node("d",6,null);
+//        mh_heft.Node t5 = new mh_heft.Node("e",9,null);
+//        mh_heft.Node t6 = new mh_heft.Node("f",5,null);
+//        mh_heft.Node t7 = new mh_heft.Node("g",11,null);
+//        mh_heft.Node t8 = new mh_heft.Node("h",5,null);
+//        mh_heft.Node t9 = new mh_heft.Node("i",12,null);
+//        mh_heft.Node t10 = new mh_heft.Node("j",7,null);
+//        mh_heft.Node t11 = new mh_heft.Node("k",4,null);
 //
 //        dag.addDependency(t1,t2,17);
 //        dag.addDependency(t1,t3,12);
@@ -34,12 +34,12 @@ public class TestClass {
 //        dag.entry = t1;
 //        t5.deadline = 100;
 //        t7.deadline = 120;
-//        NodeSort ts = new NodeSort();
+//        mh_heft.NodeSort ts = new mh_heft.NodeSort();
 ////        ts.calculateRank(dag);
 //        ts.DoTaskSort(dag);
 //        dag.printGraph();
 
-//        DagScheduler dagScheduler = new DagScheduler();
+//        mh_heft.DagScheduler dagScheduler = new mh_heft.DagScheduler();
 //        dagScheduler.schedule(dag);
 //        dag.printGraph();
 //        dagScheduler.inQueue();

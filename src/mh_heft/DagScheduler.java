@@ -1,3 +1,5 @@
+package mh_heft;
+
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -6,7 +8,7 @@ public class DagScheduler {
     public Queue<Node> rt_task_priority_queue;
     public Queue<Node> common_task_priority_queue;
 
-//    public DAG dag;
+//    public mh_heft.DAG dag;
 
     public DagScheduler(){
         task_priority_queue = new LinkedList<>();

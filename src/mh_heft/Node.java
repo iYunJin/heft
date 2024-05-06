@@ -1,3 +1,5 @@
+package mh_heft;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +25,7 @@ public class Node {
     private Task task;
     boolean isCritical;
     boolean isScheduled;
-    boolean isRTTask;
+    public boolean isRTTask;
 
     // 后继节点
     List<Node> suc;
@@ -33,7 +35,7 @@ public class Node {
     // 通信代价
     Map<Node,Integer> communicationCosts;
 
-    public Node(String name, int computationCost,Task task){
+    public Node(String name, int computationCost, Task task){
         this.name = name;
         this.computationCost = computationCost;
         this.U = 0.5;

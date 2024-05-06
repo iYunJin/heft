@@ -1,16 +1,18 @@
+package mh_heft;
+
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * Processor class to store the name, speed, and cost of a processor.
+ * mh_heft.Processor class to store the name, speed, and cost of a processor.
  */
 public class Processor {
     private String name;
-    Queue<Node> taskQueue;
+    public Queue<Node> taskQueue;
     private Node currentTask;
-    int speed;
+    public int speed;
     public Processor() {
-        this.name = "Processor";
+        this.name = "mh_heft.Processor";
         taskQueue = new ConcurrentLinkedQueue<>();
         currentTask = null;
     }
