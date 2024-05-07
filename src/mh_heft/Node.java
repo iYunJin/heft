@@ -9,10 +9,9 @@ import java.util.Map;
  * 任务类
  */
 public class Node {
-
     private String name;
     private String processorName;
-    int id;
+    String id;
     int computationCost;
     int deadline;
     long actualStartTime;
@@ -99,7 +98,7 @@ public class Node {
     public boolean isRTTask() {
         return isRTTask;
     }
-    public int getId() {
+    public String getId() {
         return id;
     }
 
@@ -144,5 +143,13 @@ public class Node {
 
     public int getCommunicationCost(Node to){
         return communicationCosts.get(to);
+    }
+
+    public List<Node> getSuc() {
+        return suc;
+    }
+
+    public List<Node> getPred() {
+        return pred;
     }
 }

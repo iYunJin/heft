@@ -33,7 +33,7 @@ public class DAG {
                 graph.put(vertex, vertex.suc);
             else
                 graph.put(vertex, new ArrayList<>());
-            vertex.id = TaskNum++;
+//            vertex.id = TaskNum++;
         }
     }
 
