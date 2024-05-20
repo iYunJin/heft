@@ -108,6 +108,8 @@ public class MultiDagScheduler{
                 }
                 Processor minEftProcessor = findMinEFTProcessor(task);
                 if (minEftProcessor != null) {
+//                    task.actualStartTime = System.currentTimeMillis();
+                    // 将任务调度到处理器
                     minEftProcessor.schedule(task);
                     iterator.remove();
                 }
@@ -138,9 +140,10 @@ public class MultiDagScheduler{
      */
     private Processor findMinEFTProcessor(Node task) {
         Processor minEftProcessor = null;
-        int minEft = Integer.MAX_VALUE;
+        long minEft = Integer.MAX_VALUE;
+
         for (Processor processor : processors) {
-            int eft = processor.calculateEFT(task);
+            long eft = calculateEFTWithCommunicationCost(processor,task);
             if (eft < minEft) {
                 minEft = eft;
                 minEftProcessor = processor;
@@ -148,4 +151,15 @@ public class MultiDagScheduler{
         }
         return minEftProcessor;
     }
+
+    private long calculateEFTWithCommunicationCost(Processor processor, Node newTask) {
+        long eft = processor.calculateEFT(newTask);
+        for (Node pred : newTask.getPred()) {
+            if (!pred.getProcessorName().equals(processor.getName())) {
+                eft += pred.getCommunicationCost(newTask);
+            }
+        }
+        return eft;
+    }
+
 }

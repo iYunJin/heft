@@ -6,12 +6,12 @@ public class TestTaskScheduling {
 
     public static void main(String[] args) throws InterruptedException {
         // 创建三个处理器，每个处理器的处理速度不同
-        Processor processor1 = new Processor("Processor1");
-        processor1.speed = 1;
-        Processor processor2 = new Processor("Processor2");
-        processor2.speed = 2;
-        Processor processor3 = new Processor("Processor3");
+        Processor processor1 = new Processor("Processor1",1);
+        Processor processor2 = new Processor("Processor2",2);
+        processor2.mips = 2000L;
+        Processor processor3 = new Processor("Processor3",3);
         processor3.speed = 3;
+        processor3.mips = 3000L;
 
         // 创建一个多DAG调度器
         MultiDagScheduler multiDagScheduler = new MultiDagScheduler();
@@ -20,30 +20,19 @@ public class TestTaskScheduling {
         multiDagScheduler.addProcessor(processor3);
 
 
-        Task task1 = new Task() {
-            @Override
-            public void run(){
-                try {
-                    sleep(20);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-
         // 创建一个DAG，并添加到多DAG调度器中
         DAG dag = new DAG("dag1");
-        Node t1 = new Node("a1",8,task1);
-        Node t2 = new Node("a2",7,task1);
-        Node t3 = new Node("a3",10,task1);
-        Node t4 = new Node("a4",6,task1);
-        Node t5 = new Node("a5",9,task1);
-        Node t6 = new Node("a6",5,task1);
-        Node t7 = new Node("a7",11,task1);
-        Node t8 = new Node("a8",5,task1);
-        Node t9 = new Node("a9",12,task1);
-        Node t10 = new Node("a10",7,task1);
-        Node t11 = new Node("a11",4,task1);
+        Node t1 = new Node("a1",18,null);
+        Node t2 = new Node("a2",17,null);
+        Node t3 = new Node("a3",20,null);
+        Node t4 = new Node("a4",16,null);
+        Node t5 = new Node("a5",19,null);
+        Node t6 = new Node("a6",15,null);
+        Node t7 = new Node("a7",21,null);
+        Node t8 = new Node("a8",15,null);
+        Node t9 = new Node("a9",22,null);
+        Node t10 = new Node("a10",17,null);
+        Node t11 = new Node("a11",14,null);
 
         t5.isRTTask = true;
         t7.isRTTask = true;
@@ -65,13 +54,13 @@ public class TestTaskScheduling {
         multiDagScheduler.addDag(dag);
 
         DAG dag2 = new DAG("dag1");
-        Node v1 = new Node("b1",8,task1);
-        Node v2 = new Node("b2",7,task1);
-        Node v3 = new Node("b3",10,task1);
-        Node v4 = new Node("b4",6,task1);
-        Node v5 = new Node("b5",9,task1);
-        Node v6 = new Node("b6",5,task1);
-        Node v7 = new Node("b7",11,task1);
+        Node v1 = new Node("b1",18,null);
+        Node v2 = new Node("b2",17,null);
+        Node v3 = new Node("b3",20,null);
+        Node v4 = new Node("b4",16,null);
+        Node v5 = new Node("b5",19,null);
+        Node v6 = new Node("b6",15,null);
+        Node v7 = new Node("b7",21,null);
 
         v3.isRTTask = true;
         v4.isRTTask = true;
@@ -93,39 +82,10 @@ public class TestTaskScheduling {
 
 
         // 创建三个线程，每个线程模拟一个处理器
-        Thread thread1 = new Thread(() -> {
-            while (!multiDagScheduler.ready_queue.isEmpty() || !processor1.taskQueue.isEmpty()) {
+        Thread thread1 = new Thread(processor1);
+        Thread thread2 = new Thread(processor2);
+        Thread thread3 = new Thread(processor3);
 
-                processor1.execute();
-                try {
-                    sleep(1); // 等待1m
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        Thread thread2 = new Thread(() -> {
-            while (!multiDagScheduler.ready_queue.isEmpty() || !processor2.taskQueue.isEmpty()) {
-                processor2.execute();
-                try {
-                    sleep(1); // 等待1m
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        Thread thread3 = new Thread(() -> {
-            while (!multiDagScheduler.ready_queue.isEmpty()|| !processor3.taskQueue.isEmpty()) {
-                processor3.execute();
-                try {
-                    sleep(1); // 等待1m
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
 
         // 启动线程
         thread1.start();
@@ -136,11 +96,13 @@ public class TestTaskScheduling {
         dag2.getTime();
         // 主线程继续调度任务
 
-        multiDagScheduler.scheduleTasks2();
-//        multiDagScheduler.cm_task_in_queue();
-//        multiDagScheduler.scheduleTasks();
+        multiDagScheduler.scheduleTasks();
+
 
         // 等待所有线程完成
+        processor1.stop();
+        processor2.stop();
+        processor3.stop();
         thread1.join();
         thread2.join();
         thread3.join();

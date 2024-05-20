@@ -6,20 +6,25 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * mh_heft.Processor class to store the name, speed, and cost of a processor.
  */
-public class Processor {
+public class Processor implements Runnable {
     private String name;
     public Queue<Node> taskQueue;
     private Node currentTask;
+    public long mips = 1000L;
     public int speed;
+    public boolean running;
+    private long timeSlice = 1; // 模拟的时间片
     public Processor() {
         this.name = "mh_heft.Processor";
         taskQueue = new ConcurrentLinkedQueue<>();
         currentTask = null;
     }
-    public Processor(String name) {
+    public Processor(String name,int speed) {
         this.name = name;
         taskQueue = new ConcurrentLinkedQueue<>();
         currentTask = null;
+        this.speed = speed;
+        this.running = true;
     }
 
     /**
@@ -30,12 +35,12 @@ public class Processor {
     public int calculateEFT(Node newTask) {
         int eft = 0;
         for (Node task : taskQueue) {
-            eft += task.getExecutionTime();
+            eft += task.getRemainingTime();
         }
         if (currentTask != null) {
-            eft += currentTask.getExecutionTime();
+            eft += currentTask.getRemainingTime();
         }
-        eft += newTask.getExecutionTime() /speed;
+        eft += newTask.getComputationCost() /speed;
         return eft;
     }
 
@@ -56,19 +61,32 @@ public class Processor {
      * 执行处理器的下一个任务
      */
     public void execute() {
-        if(taskQueue.isEmpty()) {
+        if(currentTask != null ){
             return;
         }
-        // 如果当前没有正在执行的任务，那么从任务队列中取出一个任务开始执行
-//        if(currentTask == null || currentTask.isCompleted()) {
+
+        if (taskQueue.isEmpty())
+            return;
+
         currentTask = taskQueue.poll();
-//        if (currentTask != null) {
-        currentTask.isScheduled = true;
-        currentTask.actualStartTime = System.currentTimeMillis();
-        currentTask.execute();
-        currentTask.actualFinishTime = System.currentTimeMillis();
-//        }
-//        }
+        if (currentTask != null) {
+            currentTask.isScheduled = true;
+            long executionTime = currentTask.getComputationCost() / speed;
+            currentTask.actualStartTime = System.currentTimeMillis();
+            while(executionTime > 0) {
+                try {
+                    Thread.sleep(timeSlice);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                currentTask.executeForTime((int) timeSlice);
+                executionTime -= timeSlice;
+            }
+//            currentTask.execute();
+            currentTask.complete();
+            currentTask.actualFinishTime = System.currentTimeMillis();
+            currentTask = null;
+        }
     }
 
     public String getName() {
@@ -77,5 +95,20 @@ public class Processor {
 
     public int getSpeed() {
         return speed;
+    }
+
+    @Override
+    public void run() {
+        while (running) {
+            execute();
+            try {
+                Thread.sleep(10); // Prevent busy-waiting
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+    public void stop() {
+        this.running = false;
     }
 }

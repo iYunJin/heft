@@ -13,6 +13,7 @@ public class Node {
     private String processorName;
     String id;
     int computationCost;
+    long length;
     int deadline;
     long actualStartTime;
     long actualFinishTime;
@@ -26,6 +27,9 @@ public class Node {
     boolean isScheduled;
     public boolean isRTTask;
 
+    private int remainingTime; // 剩余执行时间
+    private int executedTime;  // 已执行时间
+
     // 后继节点
     List<Node> suc;
     // 前驱节点
@@ -34,9 +38,11 @@ public class Node {
     // 通信代价
     Map<Node,Integer> communicationCosts;
 
-    public Node(String name, int computationCost, Task task){
+    public Node(String name, int computationCost,Task task){
         this.name = name;
+        this.remainingTime = computationCost;
         this.computationCost = computationCost;
+        this.length = computationCost * 1000L;
         this.U = 0.5;
         this.V = 0.5;
         this.pred = new ArrayList<>();
@@ -74,9 +80,10 @@ public class Node {
 
     public void execute() {
 //        System.out.println("task "+this.name+" is running\n");
-        if(task!=null) {
-            task.run();
-        }
+//        int
+//        if(task!=null) {
+////            task.run();
+//        }
         complete();
     }
 
@@ -85,6 +92,9 @@ public class Node {
     }
     public int getComputationCost() {
         return computationCost;
+    }
+    public long getLength() {
+        return length;
     }
     public int getDeadline() {
         return deadline;
@@ -102,9 +112,9 @@ public class Node {
         return id;
     }
 
-    public int getExecutionTime() {
-        return computationCost;
-    }
+//    public int getExecutionTime() {
+//        return computationCost;
+//    }
 
     /**
      * 检查任务是否已经完成
@@ -117,7 +127,7 @@ public class Node {
     /**
      * 标记任务为已完成
      */
-    private void complete() {
+    public void complete() {
         this.isCompleted = true;
     }
 
@@ -151,5 +161,28 @@ public class Node {
 
     public List<Node> getPred() {
         return pred;
+    }
+
+    public Task getTask() {
+        return task;
+    }
+
+    public int getRemainingTime() {
+        return remainingTime;
+    }
+
+    public void executeForTime(int time) {
+        if (time > remainingTime) {
+            executedTime += remainingTime;
+            remainingTime = 0;
+            complete();
+        } else {
+            executedTime += time;
+            remainingTime -= time;
+        }
+    }
+
+    public int getExecutedTime() {
+        return executedTime;
     }
 }

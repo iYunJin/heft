@@ -5,6 +5,7 @@ import java.util.*;
 public class DAG {
     String name;
     Node entry;
+    private List<Node> nodes;
     //存储图的邻接表
     public final Map<Node, List<Node>> graph;
     int TaskNum;
@@ -22,18 +23,21 @@ public class DAG {
     public DAG(String name) {
         this.name = name;
         graph = new HashMap<>();
+        nodes = new ArrayList<>();
     }
 
     /**
      * 添加节点函数
      */
-    public void addTask(Node vertex) {
-        if (!graph.containsKey(vertex)) {
-            if (!vertex.suc.isEmpty())
-                graph.put(vertex, vertex.suc);
+    public void addTask(Node node) {
+        if (!graph.containsKey(node)) {
+            if (!node.suc.isEmpty())
+                graph.put(node, node.suc);
             else
-                graph.put(vertex, new ArrayList<>());
-//            vertex.id = TaskNum++;
+                graph.put(node, new ArrayList<>());
+        }
+        if(!nodes.contains((node))){
+            nodes.add(node);
         }
     }
 
@@ -122,6 +126,13 @@ public class DAG {
 
     }
 
+    public void addNode(Node node) {
+        nodes.add(node);
+    }
+
+    public List<Node> getNodes() {
+        return nodes;
+    }
     public void setEntry(Node entry) {
         this.entry = entry;
     }
