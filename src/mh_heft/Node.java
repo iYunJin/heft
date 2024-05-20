@@ -18,6 +18,7 @@ public class Node {
     long actualStartTime;
     long actualFinishTime;
     int rank;
+    int priorityLevel;
     double priority;
     double U;
     double V;
@@ -26,6 +27,13 @@ public class Node {
     boolean isCritical;
     boolean isScheduled;
     public boolean isRTTask;
+    static final int HIGH_PRIORITY = 3;
+    static final int MEDIUM_PRIORITY = 2;
+    static final int LOW_PRIORITY = 1;
+
+    static final int HIGH_PRIORITY_DEADLINE = 5;
+    static final int MEDIUM_PRIORITY_DEADLINE = 10;
+    static final int LOW_PRIORITY_DEADLINE = 15;
 
     private int remainingTime; // 剩余执行时间
     private int executedTime;  // 已执行时间
@@ -38,10 +46,11 @@ public class Node {
     // 通信代价
     Map<Node,Integer> communicationCosts;
 
-    public Node(String name, int computationCost,Task task){
+    public Node(String name, int computationCost,Task task,int priorityLevel){
         this.name = name;
         this.remainingTime = computationCost;
         this.computationCost = computationCost;
+        this.priorityLevel = priorityLevel;
         this.length = computationCost * 1000L;
         this.U = 0.5;
         this.V = 0.5;

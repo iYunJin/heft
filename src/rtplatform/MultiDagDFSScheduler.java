@@ -21,21 +21,21 @@ public class MultiDagDFSScheduler {
             for (Node node : sortedNodes) {
                 Processor selectedProcessor = selectProcessor(node);
                 selectedProcessor.schedule(node);
-                System.out.println("Scheduled " + node.getName() + " on " + selectedProcessor.getName());
+//                System.out.println("Scheduled " + node.getName() + " on " + selectedProcessor.getName());
             }
         }
 
-        for (Processor processor : processors) {
-            processor.stop();
-        }
+//        for (Processor processor : processors) {
+//            processor.stop();
+//        }
 
-        for (Thread thread : processorThreads) {
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
+//        for (Thread thread : processorThreads) {
+//            try {
+//                thread.join();
+//            } catch (InterruptedException e) {
+//                Thread.currentThread().interrupt();
+//            }
+//        }
     }
 
     public void addDAG(DAG dag) {
@@ -43,9 +43,9 @@ public class MultiDagDFSScheduler {
     }
     private void dfs(Node node, Set<Node> visited, Stack<Node> stack) {
         visited.add(node);
-        for (Node dependency : node.getPred()) {
-            if (!visited.contains(dependency)) {
-                dfs(dependency, visited, stack);
+        for (Node successor  : node.getSuc()) {
+            if (!visited.contains(successor )) {
+                dfs(successor , visited, stack);
             }
         }
         stack.push(node);
@@ -85,11 +85,11 @@ public class MultiDagDFSScheduler {
 
     private long calculateEFTWithCommunicationCost(Processor processor, Node newTask) {
         long eft = processor.calculateEFT(newTask);
-        for (Node pred : newTask.getPred()) {
-            if (!pred.getProcessorName().equals(processor.getName())) {
-                eft += pred.getCommunicationCost(newTask);
-            }
-        }
+//        for (Node pred : newTask.getPred()) {
+//            if (!pred.getProcessorName().equals(processor.getName())) {
+//                eft += pred.getCommunicationCost(newTask);
+//            }
+//        }
         return eft;
     }
     public void addProcess(Processor p){

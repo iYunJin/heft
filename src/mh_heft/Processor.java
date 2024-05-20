@@ -109,6 +109,9 @@ public class Processor implements Runnable {
         }
     }
     public void stop() {
-        this.running = false;
+        while(running) {
+            if (currentTask == null && taskQueue.isEmpty())
+                this.running = false;
+        }
     }
 }

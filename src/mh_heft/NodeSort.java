@@ -70,6 +70,17 @@ public class NodeSort {
 
         for (Node task : dag.sortedTasks) {
             double par;
+            if(task.priority == Node.HIGH_PRIORITY){
+                task.U = 0.7;
+                task.V = 0.3;
+
+            }else if(task.priority == Node.MEDIUM_PRIORITY){
+                task.U = 0.6;
+                task.V = 0.4;
+            }else {
+                task.U = 0.5;
+                task.V = 0.5;
+            }
             if (task.isCritical) {
                 // 实时任务的优先级由截止时间和计算成本得出
                 par = task.U * task.deadline + task.V * task.rank;
@@ -111,7 +122,7 @@ public class NodeSort {
         dags[0] = new DAG("rt_dag");
         dags[1] = new DAG("common_dag");
 
-        Node entry = new Node("virtual_entry", 0,null);
+        Node entry = new Node("virtual_entry", 0,null,Node.LOW_PRIORITY);
         dags[1].addTask(entry);
         commonNum++;
 

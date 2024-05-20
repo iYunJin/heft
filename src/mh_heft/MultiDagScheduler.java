@@ -117,19 +117,19 @@ public class MultiDagScheduler{
         }
     }
 
-    public void scheduleTasks2() {
-        while (!ready_queue.isEmpty()) {
-            Node task = ready_queue.peek();
-            if (task.allDependenciesCompleted()) {
-                Processor minEftProcessor = findMinEFTProcessor(task);
-                if (minEftProcessor != null) {
-                    // 将任务调度到处理器
-                    minEftProcessor.schedule(task);
-                }
-                ready_queue.poll();
-            }
-        }
-    }
+//    public void scheduleTasks2() {
+//        while (!ready_queue.isEmpty()) {
+//            Node task = ready_queue.peek();
+//            if (task.allDependenciesCompleted()) {
+//                Processor minEftProcessor = findMinEFTProcessor(task);
+//                if (minEftProcessor != null) {
+//                    // 将任务调度到处理器
+//                    minEftProcessor.schedule(task);
+//                }
+//                ready_queue.poll();
+//            }
+//        }
+//    }
 
 
     /**
