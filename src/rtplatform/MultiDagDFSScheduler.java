@@ -15,65 +15,111 @@ public class MultiDagDFSScheduler {
         this.processors = new ArrayList<>();
         this.processorThreads = new ArrayList<>();
     }
+
     public void schedule() {
+
+        Node readytask = null;
+        List<Node> allTasks = new ArrayList<>();
         for (DAG dag : dags) {
-            List<Node> sortedNodes = topologicalSort(dag.getNodes());
-            for (Node node : sortedNodes) {
-                Processor selectedProcessor = selectProcessor(node);
-                selectedProcessor.schedule(node);
-//                System.out.println("Scheduled " + node.getName() + " on " + selectedProcessor.getName());
+            dag.topologicalSort();
+            allTasks.addAll(dag.sortedTasks);
+        }
+
+        // Compute ranku for each task
+        for (Node task : allTasks) {
+            task.rank = computeRanku(task);
+
+            task.setDeadline(calculateDeadline(task));
+            if(task.priorityLevel == Node.HIGH_PRIORITY)
+                task.deadline *= 1.1;
+            else if(task.priorityLevel == Node.MEDIUM_PRIORITY)
+                task.deadline *= 1.2;
+            else
+                task.deadline *= 1.3;
+        }
+
+        // Sort tasks by decreasing ranku
+        allTasks.sort((a, b) -> Double.compare(b.rank, a.rank));
+
+        for (Node asd : allTasks) {
+            System.out.println(asd.getName());
+        }
+
+        for(DAG dag:dags)
+            dag.getTime();
+
+        while (!allTasks.isEmpty()) {
+
+            if(readytask == null || readytask.isCompleted()) {
+                readytask = allTasks.get(0);
+                Processor minEftProcessor = selectProcessor(readytask);
+                minEftProcessor.schedule(readytask);
+                allTasks.remove(readytask);
+
+                scheduleRemainingTasks(allTasks.iterator());
+                scheduleRemainingTasks(allTasks.iterator());
+
             }
         }
 
-//        for (Processor processor : processors) {
-//            processor.stop();
-//        }
+    }
+    private void scheduleRemainingTasks(Iterator<Node> iterator) {
+//        int count = 0;
+//        Iterator<Node> iterator = ready_queue.iterator();
+        while (iterator.hasNext()) {
+            Node task = iterator.next();
+            if (!task.allDependenciesCompleted()) {
+                continue;
+            }
+            Processor minEftProcessor = selectProcessor(task);
+            if (minEftProcessor != null) {
+//                task.slack = System.currentTimeMillis();
+                minEftProcessor.schedule(task);
+                iterator.remove();
+                break;
+            }
+        }
+    }
 
-//        for (Thread thread : processorThreads) {
-//            try {
-//                thread.join();
-//            } catch (InterruptedException e) {
-//                Thread.currentThread().interrupt();
-//            }
-//        }
+    private double computeRanku(Node task) {
+        if (task.getSuc().isEmpty()) {
+            return task.getComputationCost();
+        }
+
+        double maxRank = 0;
+        for (Node succ : task.getSuc()) {
+//            double commCost = ;
+            double rank = computeRanku(succ) + task.getCommunicationCost(succ) + task.getComputationCost();
+            if (rank > maxRank) {
+                maxRank = rank;
+            }
+        }
+        return maxRank;
     }
 
     public void addDAG(DAG dag) {
         dags.add(dag);
     }
-    private void dfs(Node node, Set<Node> visited, Stack<Node> stack) {
-        visited.add(node);
-        for (Node successor  : node.getSuc()) {
-            if (!visited.contains(successor )) {
-                dfs(successor , visited, stack);
-            }
-        }
-        stack.push(node);
-    }
-    private List<Node> topologicalSort(List<Node> nodes) {
-        Stack<Node> stack = new Stack<>();
-        Set<Node> visited = new HashSet<>();
 
-        for (Node node : nodes) {
-            if (!visited.contains(node)) {
-                dfs(node, visited, stack);
-            }
-        }
 
-        List<Node> sortedNodes = new ArrayList<>();
-        while (!stack.isEmpty()) {
-            sortedNodes.add(stack.pop());
+    private void scheduleTask(Node task) {
+
+        Processor minEftProcessor = selectProcessor(task);
+        if (minEftProcessor != null) {
+                    // 将任务调度到处理器
+            task.slack = System.currentTimeMillis();
+            minEftProcessor.schedule(task);
         }
-        return sortedNodes;
     }
+
 
     private Processor selectProcessor(Node node) {
         // Select the processor with the minimum EFT (Earliest Finish Time)
         Processor selectedProcessor = null;
-        long minEFT = Long.MAX_VALUE;
+        double minEFT = Long.MAX_VALUE;
 
         for (Processor processor : processors) {
-            long eft = calculateEFTWithCommunicationCost(processor, node);
+            double eft = calculateEFTWithCommunicationCost(processor, node);
             if (eft < minEFT) {
                 minEFT = eft;
                 selectedProcessor = processor;
@@ -83,19 +129,29 @@ public class MultiDagDFSScheduler {
         return selectedProcessor;
     }
 
-    private long calculateEFTWithCommunicationCost(Processor processor, Node newTask) {
-        long eft = processor.calculateEFT(newTask);
-//        for (Node pred : newTask.getPred()) {
-//            if (!pred.getProcessorName().equals(processor.getName())) {
-//                eft += pred.getCommunicationCost(newTask);
-//            }
-//        }
+    private double calculateEFTWithCommunicationCost(Processor processor, Node newTask) {
+        double eft = processor.calculateEFT(newTask);
+        for (Node pred : newTask.getPred()) {
+            if (!pred.getProcessorName().equals(processor.getName())) {
+                eft += pred.getCommunicationCost(newTask);
+            }
+        }
         return eft;
     }
     public void addProcess(Processor p){
         this.processors.add(p);
     }
-
+    private int calculateDeadline(Node task){
+        if(task.pred.isEmpty()){
+            return 0;
+        }
+        int maxDead = 0;
+        for(Node pred : task.pred){
+            int deadline  = calculateDeadline(pred) + pred.communicationCosts.get(task);
+            maxDead = Math.max(maxDead,deadline);
+        }
+        return maxDead + task.computationCost;
+    }
 //    private void scheduleTask(Node node, Map<Node, Long> nodeStartTimes, Map<Node, Long> nodeEndTimes) {
 //        long earliestStart = 0;
 //        for (Node dependency : node.getPred()) {

@@ -4,37 +4,14 @@ import java.util.*;
 
 public class NodeSort {
 
+    private double minCost = 0;
+    private double maxCost = 0;
+    private double minDeadline = 0;
+    private double maxDeadline = 0;
+
+
     public NodeSort() {
-//        this.earliestFinishTimes = new HashMap<>();
     }
-
-    /**
-     * 计算任务的rank
-     */
-    public void calculateRank(DAG dag) {
-        if (dag.sortedTasks == null)
-            dag.topologicalSort();
-
-        Collections.reverse(dag.sortedTasks);
-        //递归调用计算
-        for (Node task : dag.sortedTasks) {
-            task.rank = upwardRank(task);
-        }
-        Collections.reverse(dag.sortedTasks);
-    }
-    private int upwardRank(Node task) {
-        if (task.suc.isEmpty()) {
-            return task.computationCost;
-        }
-        int maxRank = 0;
-        for (Node suc : task.suc) {
-            int rank = upwardRank(suc) + task.communicationCosts.get(suc);
-            maxRank = Math.max(maxRank, rank);
-        }
-        return maxRank + task.computationCost;
-    }
-
-
     /**
      * 遍历节点，获取关键路径
      */
@@ -42,22 +19,50 @@ public class NodeSort {
         if (dag.sortedTasks == null)
             dag.topologicalSort();
 
-        calculateRank(dag);
+        //计算任务的截止完成时间
+        for (Node task : dag.sortedTasks) {
+            task.deadline = calculateDeadline(task);
+            if(task.priorityLevel == Node.HIGH_PRIORITY)
+                task.deadline *= 1.1;
+            else if(task.priorityLevel == Node.MEDIUM_PRIORITY)
+                task.deadline *= 1.2;
+            else
+                task.deadline *= 1.3;
+        }
+
         //设置关键路径
         for (Node task : dag.sortedTasks) {
-            if (task.isRTTask) {
+            if (task.priorityLevel == Node.HIGH_PRIORITY){
                 setCritical(task);
             }
+            minCost = task.computationCost < minCost ? task.computationCost : minCost;
+            maxCost = task.computationCost > maxCost ? task.computationCost : maxCost;
+            maxDeadline = task.deadline > maxDeadline ? task.deadline : maxDeadline;
+            minDeadline = task.deadline < minDeadline ? task.deadline : minDeadline;
         }
         //计算优先级
         calculateTaskPriority(dag);
         //分离关键路径和普通任务
         DAG[] dags = separateTasks(dag);
 //        排序
-        do_sort(dags[0]);
-        do_sort(dags[1]);
-        dag.sortedRTTasks = dags[0].sortedTasks;
-        dag.sortedCommonTasks = dags[1].sortedTasks;
+        do_sort(dags[0],dag);
+        do_sort(dags[1],dag);
+
+//        dag.sortedRTTasks = dags[0].sortedTasks;
+//        dag.sortedCommonTasks = dags[1].sortedTasks;
+
+    }
+
+    private int calculateDeadline(Node task){
+        if(task.pred.isEmpty()){
+            return 0;
+        }
+        int maxDead = 0;
+        for(Node pred : task.pred){
+            int deadline  = calculateDeadline(pred) + pred.communicationCosts.get(task);
+            maxDead = Math.max(maxDead,deadline );
+        }
+        return maxDead + task.computationCost;
     }
 
     /**
@@ -69,11 +74,12 @@ public class NodeSort {
             dag.topologicalSort();
 
         for (Node task : dag.sortedTasks) {
-            double par;
+            double normalizedCost = (task.getComputationCost() - minCost) / (maxCost - minCost);
+            double normalizedDeadline = (task.deadline - minDeadline) / (maxDeadline - minDeadline);
+
             if(task.priority == Node.HIGH_PRIORITY){
                 task.U = 0.7;
                 task.V = 0.3;
-
             }else if(task.priority == Node.MEDIUM_PRIORITY){
                 task.U = 0.6;
                 task.V = 0.4;
@@ -81,16 +87,7 @@ public class NodeSort {
                 task.U = 0.5;
                 task.V = 0.5;
             }
-            if (task.isCritical) {
-                // 实时任务的优先级由截止时间和计算成本得出
-                par = task.U * task.deadline + task.V * task.rank;
-            } else {
-                // 普通任务的优先级由前置任务里是否有实时任务和计算成本决定
-                boolean hasRTTaskPred = task.pred.stream().anyMatch(Node::isRTTask);
-                par = task.U * (hasRTTaskPred ? 50 : 0) + task.V * task.rank;
-            }
-
-            task.priority =  par;
+            task.priority = task.priorityLevel+ task.U * normalizedDeadline + task.V * normalizedCost;
         }
     }
 
@@ -101,12 +98,13 @@ public class NodeSort {
      */
     private void setCritical(Node task){
         task.isCritical = true;
+        task.priorityLevel = Node.HIGH_PRIORITY;
 
         if(task.pred.isEmpty())
             return;
 
         for(Node pred : task.pred){
-            pred.deadline = pred.deadline == 0 ? task.deadline :Math.min(task.deadline,pred.deadline);
+//            pred.deadline = pred.deadline == 0 ? task.deadline :Math.min(task.deadline,pred.deadline);
             setCritical(pred);
         }
     }
@@ -117,19 +115,21 @@ public class NodeSort {
      * @return 分离后的DAG数组
      */
     private DAG[] separateTasks(DAG dag) {
-        int commonNum=0,rtNum=0;
+        int commonNum = 0, rtNum = 0;
+
         DAG[] dags = new DAG[2];
+
         dags[0] = new DAG("rt_dag");
         dags[1] = new DAG("common_dag");
 
-        Node entry = new Node("virtual_entry", 0,null,Node.LOW_PRIORITY);
-        dags[1].addTask(entry);
-        commonNum++;
-
+//        Node entry = new Node("virtual_entry", 0,null,Node.MEDIUM_PRIORITY);
+//        dags[1].addTask(entry);
+//        commonNum++;
+        //
         for (Node task : dag.sortedTasks) {
             if (task.isCritical) {
-                dags[0].addTask(task);
                 rtNum++;
+                dags[0].addTask(task);
                 task.suc.removeIf(suc -> !suc.isCritical);
             } else {
                 commonNum++;
@@ -138,18 +138,37 @@ public class NodeSort {
             }
         }
 
-        dags[0].entry= dag.entry;
+//        dags[0].entry = dag.entry;
+//        dags[0].topologicalSort();
         dags[1].topologicalSort();
-        dags[1].entry = entry;
+        dags[0].rtTaskNum = rtNum;
+        dags[1].commonTaskNum = commonNum;
 
-        //添加虚拟入口节点
-        for (Node task : dags[1].sortedTasks) {
-            if (task.pred.isEmpty() && task != entry) {
-                dags[1].addDependency(entry, task, 0);
-            }
+        if(rtNum == 0 ){
+            dags[0] = null;
         }
-        dag.rtTaskNum = rtNum;
-        dag.commonTaskNum = commonNum;
+
+        if (commonNum ==0) {
+            dags[1] = null;
+        }
+//        dags[1].topologicalSort();
+
+
+//        Node entry = new Node("virtual_entry", 0, null, Node.MEDIUM_PRIORITY);
+//        dags[1].addTask(entry);
+//        commonNum++;
+//        dags[0].entry = dag.entry;
+//        dags[1].topologicalSort();
+//        dags[1].entry = entry;
+        //添加虚拟入口节点
+//        if (dags[1].entry.suc.isEmpty()) {
+//            for (Node task : dags[1].sortedTasks) {
+//                if (task.pred.isEmpty() && task != entry) {
+//                    dags[1].addDependency(entry, task, 0);
+//                }
+//            }
+//        }
+
         return dags;
     }
 
@@ -157,7 +176,11 @@ public class NodeSort {
     /**
      * 根据任务的优先级进行排序，优先级高的任务在队列前面
      */
-    private void do_sort(DAG dag) {
+    private void do_sort(DAG dag,DAG originalDag) {
+
+        if(dag == null)
+            return;
+
         if(dag.sortedTasks == null)
             dag.topologicalSort();
 
@@ -181,5 +204,16 @@ public class NodeSort {
         }
 
         dag.sortedTasks = scheduledTasks;
+
+        if(dag.rtTaskNum != 0) {
+            originalDag.sortedRTTasks = dag.sortedTasks;
+            originalDag.rtTaskNum += dag.rtTaskNum;
+        }
+
+        if(dag.commonTaskNum != 0) {
+            originalDag.sortedCommonTasks = dag.sortedTasks;
+            originalDag.commonTaskNum += dag.commonTaskNum;
+        }
     }
+
 }

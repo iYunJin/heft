@@ -25,7 +25,7 @@ public class MultiDagScheduler{
     /**
      * 根据已添加的dag进行任务的排序和分离入列。
      */
-    public void task_job() {
+    private void task_job() {
         for (DAG dag : dags) {
             DagScheduler scheduler = new DagScheduler();
             schedulers.add(scheduler);
@@ -38,45 +38,58 @@ public class MultiDagScheduler{
     /**
      * 所有dag任务入列
      */
-    public void task_in_queue() {
-        while(RtTaskNum > 0) {
+    private void rt_task_in_queue() {
+        while (RtTaskNum > 0) {
             Node inTask = null;
             DagScheduler tmpScheduler = null;
             for (DagScheduler scheduler : schedulers) {
                 if (scheduler.rt_task_priority_queue.isEmpty())
                     continue;
-                if (inTask == null) {
-                    inTask = scheduler.rt_task_priority_queue.peek();
+
+                if (tmpScheduler == null) {
+//                    inTask = scheduler.common_task_priority_queue.peek();
                     tmpScheduler = scheduler;
                 }
 
-                if (scheduler.rt_task_priority_queue.peek().getPriority() > inTask.getPriority()) {
-                    inTask = scheduler.rt_task_priority_queue.peek();
+                if( tmpScheduler.rt_task_priority_queue.peek().priority > scheduler.rt_task_priority_queue.peek().priority)
                     tmpScheduler = scheduler;
-                }
 
+//                if (inTask == null) {
+//                    inTask = scheduler.rt_task_priority_queue.peek();
+//                    tmpScheduler = scheduler;
+//                }
+//                if (scheduler.rt_task_priority_queue.peek().getPriority() > inTask.getPriority()) {
+//                    inTask = scheduler.rt_task_priority_queue.peek();
+//                    tmpScheduler = scheduler;
+//                }
             }
             if (tmpScheduler != null) {
                 ready_queue.offer(tmpScheduler.rt_task_priority_queue.poll());
             }
             RtTaskNum--;
         }
-
+    }
+    private void common_task_in_queue() {
+//        Node inTask ;
+        DagScheduler tmpScheduler ;
         while(CommonTaskNum > 0) {
-            Node inTask = null;
-            DagScheduler tmpScheduler = null;
+//            inTask = null;
+            tmpScheduler = null;
             for (DagScheduler scheduler : schedulers) {
                 if (scheduler.common_task_priority_queue.isEmpty())
                     continue;
-                if (inTask == null) {
-                    inTask = scheduler.common_task_priority_queue.peek();
+
+                if (tmpScheduler == null) {
+//                    inTask = scheduler.common_task_priority_queue.peek();
                     tmpScheduler = scheduler;
                 }
 
-                if (scheduler.common_task_priority_queue.peek().getPriority() > inTask.getPriority()) {
-                    inTask = scheduler.common_task_priority_queue.peek();
+                if( tmpScheduler.common_task_priority_queue.peek().priority > scheduler.common_task_priority_queue.peek().priority)
                     tmpScheduler = scheduler;
-                }
+
+//                if (scheduler.common_task_priority_queue.peek().getPriority() > inTask.getPriority()) {
+//                    inTask = scheduler.common_task_priority_queue.peek();
+//                }
             }
             if (tmpScheduler != null) {
                 ready_queue.offer(tmpScheduler.common_task_priority_queue.poll());
@@ -94,44 +107,70 @@ public class MultiDagScheduler{
         processors.add(processor);
     }
 
+    public void schedule() {
+        task_job();
+        rt_task_in_queue();
+        common_task_in_queue();
+        for(DAG dag:dags)
+            dag.getTime();
+        scheduleTasks();
+
+//        scheduleTasks();
+    }
+
     /**
      * 调度任务到处理器
      */
-    public void scheduleTasks() {
+    private void scheduleTasks() {
+//        int count = 0;
+        Node task = null;
+
+        for(Node asd : ready_queue)
+            System.out.println(asd.getName());
+
         // 尝试调度等待队列中的任务
         while (!ready_queue.isEmpty()) {
-            Iterator<Node> iterator = ready_queue.iterator();
-            while (iterator.hasNext()) {
-                Node task = iterator.next();
-                if (!task.allDependenciesCompleted()) {
-                    continue;
-                }
+            if(task == null || task.isCompleted()) {
+                task = ready_queue.poll();
                 Processor minEftProcessor = findMinEFTProcessor(task);
-                if (minEftProcessor != null) {
-//                    task.actualStartTime = System.currentTimeMillis();
-                    // 将任务调度到处理器
-                    minEftProcessor.schedule(task);
-                    iterator.remove();
-                }
-            }
-        }
-    }
+                minEftProcessor.schedule(task);
 
-//    public void scheduleTasks2() {
-//        while (!ready_queue.isEmpty()) {
-//            Node task = ready_queue.peek();
-//            if (task.allDependenciesCompleted()) {
+                Iterator<Node> iterator = ready_queue.iterator();
+                scheduleRemainingTasks(iterator);
+                scheduleRemainingTasks(iterator);
+            }
+//            while (iterator.hasNext()) {
+//                Node task = iterator.next();
+//                if (!task.allDependenciesCompleted()) {
+//                    continue;
+//                }
 //                Processor minEftProcessor = findMinEFTProcessor(task);
 //                if (minEftProcessor != null) {
 //                    // 将任务调度到处理器
+//                    task.slack = System.currentTimeMillis();
 //                    minEftProcessor.schedule(task);
+//                    iterator.remove();
 //                }
-//                ready_queue.poll();
 //            }
-//        }
-//    }
+        }
+    }
 
-
+    private void scheduleRemainingTasks(Iterator<Node> iterator) {
+//        int count = 0;
+//        Iterator<Node> iterator = ready_queue.iterator();
+        while (iterator.hasNext()) {
+            Node task = iterator.next();
+            if (!task.allDependenciesCompleted()) {
+                continue;
+            }
+            Processor minEftProcessor = findMinEFTProcessor(task);
+            if (minEftProcessor != null) {
+                minEftProcessor.schedule(task);
+                iterator.remove();
+                break;
+            }
+        }
+    }
     /**
      * 查找具有最小EFT的处理器
      *
@@ -140,10 +179,10 @@ public class MultiDagScheduler{
      */
     private Processor findMinEFTProcessor(Node task) {
         Processor minEftProcessor = null;
-        long minEft = Integer.MAX_VALUE;
+        double minEft = Integer.MAX_VALUE;
 
         for (Processor processor : processors) {
-            long eft = calculateEFTWithCommunicationCost(processor,task);
+            double eft = calculateEFTWithCommunicationCost(processor,task);
             if (eft < minEft) {
                 minEft = eft;
                 minEftProcessor = processor;
@@ -152,8 +191,8 @@ public class MultiDagScheduler{
         return minEftProcessor;
     }
 
-    private long calculateEFTWithCommunicationCost(Processor processor, Node newTask) {
-        long eft = processor.calculateEFT(newTask);
+    private double calculateEFTWithCommunicationCost(Processor processor, Node newTask) {
+        double eft = processor.calculateEFT(newTask);
         for (Node pred : newTask.getPred()) {
             if (!pred.getProcessorName().equals(processor.getName())) {
                 eft += pred.getCommunicationCost(newTask);

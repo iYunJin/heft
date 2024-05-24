@@ -12,13 +12,15 @@ public class Node {
     private String name;
     private String processorName;
     String id;
-    int computationCost;
-    long length;
-    int deadline;
+    public int computationCost;
+//    long length;
+    public int deadline;
+//    int deadlineLevel;
     long actualStartTime;
     long actualFinishTime;
-    int rank;
-    int priorityLevel;
+    public double rank;
+    public long slack;
+    public int priorityLevel;
     double priority;
     double U;
     double V;
@@ -26,39 +28,41 @@ public class Node {
     private Task task;
     boolean isCritical;
     boolean isScheduled;
-    public boolean isRTTask;
-    static final int HIGH_PRIORITY = 3;
-    static final int MEDIUM_PRIORITY = 2;
-    static final int LOW_PRIORITY = 1;
-
-    static final int HIGH_PRIORITY_DEADLINE = 5;
-    static final int MEDIUM_PRIORITY_DEADLINE = 10;
-    static final int LOW_PRIORITY_DEADLINE = 15;
-
-    private int remainingTime; // 剩余执行时间
-    private int executedTime;  // 已执行时间
+//    public boolean isRTTask;
+    public static final int HIGH_PRIORITY = 3;
+    public static final int MEDIUM_PRIORITY = 2;
+    public static final int LOW_PRIORITY = 1;
 
     // 后继节点
     List<Node> suc;
     // 前驱节点
-    List<Node> pred;
+    public List<Node> pred;
     List<Node> usedPred;
+
+    boolean isVisited = false;
     // 通信代价
-    Map<Node,Integer> communicationCosts;
+    public Map<Node,Integer> communicationCosts;
 
     public Node(String name, int computationCost,Task task,int priorityLevel){
         this.name = name;
-        this.remainingTime = computationCost;
+//        this.remainingTime = computationCost;
         this.computationCost = computationCost;
         this.priorityLevel = priorityLevel;
-        this.length = computationCost * 1000L;
-        this.U = 0.5;
-        this.V = 0.5;
+//        this.length = computationCost * 1000L;
         this.pred = new ArrayList<>();
         this.usedPred = new ArrayList<>();
         this.suc = new ArrayList<>();
         this.communicationCosts = new HashMap<>();
         this.task = task;
+
+//        if(priorityLevel== HIGH_PRIORITY){
+//            this.deadline = HIGH_PRIORITY_DEADLINE;
+//        }else if(priorityLevel == MEDIUM_PRIORITY){
+//            this.deadline = MEDIUM_PRIORITY_DEADLINE;
+//        }else{
+//            this.deadline = LOW_PRIORITY_DEADLINE;
+//        }
+
     }
 
     /**
@@ -87,69 +91,54 @@ public class Node {
         this.usedPred.add(pred);
     }
 
-    public void execute() {
-//        System.out.println("task "+this.name+" is running\n");
-//        int
-//        if(task!=null) {
-////            task.run();
+//    public void execute() {
+//        this.actualStartTime = System.currentTimeMillis();
+//        try {
+//            Thread.sleep(computationCost); // Simulate execution time
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
 //        }
-        complete();
-    }
+//        this.actualFinishTime = System.currentTimeMillis();
+//        this.isCompleted = true;
+//    }
 
+    public boolean allDependenciesCompleted() {
+        for (Node dependency : this.usedPred)
+            if (!dependency.isCompleted())
+                return false;
+        return true;
+    }
     public String getName() {
         return name;
     }
     public int getComputationCost() {
         return computationCost;
     }
-    public long getLength() {
-        return length;
-    }
+//    public long getLength() {
+//        return length;
+//    }
     public int getDeadline() {
         return deadline;
     }
-    public double getRank() {
-        return rank;
-    }
+//    public double getRank() {
+//        return rank;
+//    }
     public double getPriority() {
         return priority;
     }
-    public boolean isRTTask() {
-        return isRTTask;
-    }
+//    public boolean isRTTask() {
+//        return isRTTask;
+//    }
     public String getId() {
         return id;
     }
 
-//    public int getExecutionTime() {
-//        return computationCost;
-//    }
-
-    /**
-     * 检查任务是否已经完成
-     *
-     * @return 如果任务已经完成，返回true，否则返回false
-     */
     public boolean isCompleted() {
         return isCompleted;
     }
-    /**
-     * 标记任务为已完成
-     */
-    public void complete() {
-        this.isCompleted = true;
-    }
 
-    /**
-     * 检查所有依赖任务是否都已经完成
-     *
-     * @return 如果所有依赖任务都已经完成，返回true，否则返回false
-     */
-    public boolean allDependenciesCompleted() {
-        for (Node dependency : this.usedPred)
-            if (!dependency.isCompleted())
-                return false;
-        return true;
+    public void setCompleted(boolean completed) {
+        this.isCompleted = completed;
     }
 
     public String getProcessorName() {
@@ -176,22 +165,37 @@ public class Node {
         return task;
     }
 
-    public int getRemainingTime() {
-        return remainingTime;
+//    public int getRemainingTime() {
+//        return remainingTime;
+//    }
+
+//    public void executeForTime(double time) {
+//        if (time > remainingTime) {
+//            executedTime += remainingTime;
+//            remainingTime = 0;
+//        } else {
+//            executedTime += time;
+//            remainingTime -= time;
+//        }
+//    }
+
+    public void setDeadline(int deadline) {
+        this.deadline = deadline;
     }
 
-    public void executeForTime(int time) {
-        if (time > remainingTime) {
-            executedTime += remainingTime;
-            remainingTime = 0;
-            complete();
-        } else {
-            executedTime += time;
-            remainingTime -= time;
-        }
+//    public int getExecutedTime() {
+//        return executedTime;
+//    }
+
+    public int calculateSlack(int currentTime) {
+        return deadline - (currentTime + getComputationCost());
     }
 
-    public int getExecutedTime() {
-        return executedTime;
+    public boolean isVisited() {
+        return isVisited;
+    }
+
+    public void setVisited(boolean visited) {
+        isVisited = visited;
     }
 }

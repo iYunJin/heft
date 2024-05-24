@@ -15,7 +15,7 @@ public class DAG {
     public List<Node> sortedRTTasks;
     public List<Node> sortedCommonTasks;
 
-    long start;
+    public long start;
 
     /**
      * 构造函数
@@ -108,7 +108,7 @@ public class DAG {
 
 
     public void getTime(){
-        start = System.currentTimeMillis();
+        start = System.nanoTime();
     }
     /**
      * 遍历图,打印rank值
@@ -119,8 +119,12 @@ public class DAG {
 
         for(Node sortedTask : sortedTasks){
 
-            System.out.println(sortedTask.getName() + " start in "+sortedTask.getProcessorName()+" in " +
-                    "time " + (sortedTask.actualStartTime-start));
+            System.out.println(sortedTask.getName() + " start in "
+                    + sortedTask.getProcessorName()+" in " +
+                    " time " + (sortedTask.actualStartTime-start)/1_000_000 +
+                    " end in " + (sortedTask.actualFinishTime-start)/1_000_000 +
+                    " deadline :" + sortedTask.deadline +
+                    " 响应 " + ((sortedTask.actualStartTime-start)/1_000_000 -sortedTask.deadline));
         }
 //            System.out.println(sortedTask.getName() + " dependencyPriority:" + sortedTask.dependencyPriority);
 
